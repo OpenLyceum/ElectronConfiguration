@@ -4,25 +4,34 @@ import { describe, expect, it } from "vitest";
 import { ConfigurationModel } from "../src/common/model/ConfigurationModel.js";
 import {
   assess,
+  block,
   CHALLENGES,
   challengeDiagram,
   configuration,
   configurationParts,
   diagramForCounts,
   electronCount,
+  FILLING_EXCEPTIONS,
   fillingPrediction,
   formatCharge,
   guidedDiagram,
   IONS,
+  ionsThrough,
+  isFillingException,
+  MAX_Z,
+  fillingPrediction as prediction,
   referenceCounts,
   referenceDiagram,
+  SUBSHELLS,
   species,
   subshellCounts,
+  tablePosition,
 } from "../src/common/model/Configurations.js";
+import { TableExtent } from "../src/common/model/TableExtent.js";
 import { ShellNode, shellCounts } from "../src/common/view/ShellNode.js";
 
 describe("reference configurations", () => {
-  it.each(Array.from({ length: 36 }, (_, i) => i + 1))("neutral Z=%i conserves electrons and follows Hund", (z) => {
+  it.each(Array.from({ length: MAX_Z }, (_, i) => i + 1))("neutral Z=%i conserves electrons and follows Hund", (z) => {
     const d = referenceDiagram(z);
     expect(electronCount(d)).toBe(z);
     expect(d.every((b) => b >= 0 && b <= 3)).toBe(true);
@@ -95,12 +104,120 @@ describe("reference configurations", () => {
     expect(configurationParts(referenceCounts(1, 1))).toEqual([]);
   });
   it("counts electrons by shell n for the shell view", () => {
-    expect(shellCounts(referenceDiagram(26))).toEqual([2, 8, 14, 2, 0]);
-    expect(shellCounts(referenceDiagram(36))).toEqual([2, 8, 18, 8, 0]);
+    expect(shellCounts(referenceDiagram(26))).toEqual([2, 8, 14, 2, 0, 0, 0]);
+    expect(shellCounts(referenceDiagram(36))).toEqual([2, 8, 18, 8, 0, 0, 0]);
+    expect(shellCounts(referenceDiagram(86))).toEqual([2, 8, 18, 32, 18, 8, 0]);
   });
   it("rejects unsupported input", () => {
-    expect(() => referenceCounts(37)).toThrow();
+    expect(() => referenceCounts(87)).toThrow();
+    expect(() => referenceCounts(0)).toThrow();
     expect(() => referenceCounts(1, 2)).toThrow();
+  });
+});
+describe("beyond krypton (to Rn)", () => {
+  // NIST Atomic Spectra Database ground configurations; exceptions and their regular neighbours.
+  it.each([
+    [37, "[Kr] 5s¹"],
+    [41, "[Kr] 4d⁴ 5s¹"],
+    [42, "[Kr] 4d⁵ 5s¹"],
+    [43, "[Kr] 4d⁵ 5s²"],
+    [44, "[Kr] 4d⁷ 5s¹"],
+    [45, "[Kr] 4d⁸ 5s¹"],
+    [46, "[Kr] 4d¹⁰"],
+    [47, "[Kr] 4d¹⁰ 5s¹"],
+    [54, "[Kr] 4d¹⁰ 5s² 5p⁶"],
+    [57, "[Xe] 5d¹ 6s²"],
+    [58, "[Xe] 4f¹ 5d¹ 6s²"],
+    [59, "[Xe] 4f³ 6s²"],
+    [64, "[Xe] 4f⁷ 5d¹ 6s²"],
+    [65, "[Xe] 4f⁹ 6s²"],
+    [71, "[Xe] 4f¹⁴ 5d¹ 6s²"],
+    [78, "[Xe] 4f¹⁴ 5d⁹ 6s¹"],
+    [79, "[Xe] 4f¹⁴ 5d¹⁰ 6s¹"],
+    [80, "[Xe] 4f¹⁴ 5d¹⁰ 6s²"],
+    [82, "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"],
+    [86, "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶"],
+  ] as const)("Z=%i is %s", (z, expected) => expect(configuration(referenceCounts(z), true)).toBe(expected));
+  it("lists exactly the thirteen NIST exceptions through Rn, each conserving electrons", () => {
+    expect(Object.keys(FILLING_EXCEPTIONS).map(Number)).toEqual([24, 29, 41, 42, 44, 45, 46, 47, 57, 58, 64, 78, 79]);
+    for (const z of Object.keys(FILLING_EXCEPTIONS).map(Number)) {
+      expect(referenceCounts(z)).not.toEqual(prediction(z));
+      expect(referenceCounts(z).reduce((a, b) => a + b, 0)).toBe(z);
+    }
+    expect(isFillingException(43)).toBe(false);
+  });
+  it.each([
+    [47, 1, "[Kr] 4d¹⁰"],
+    [48, 2, "[Kr] 4d¹⁰"],
+    [50, 2, "[Kr] 4d¹⁰ 5s²"],
+    [50, 4, "[Kr] 4d¹⁰"],
+    [53, -1, "[Kr] 4d¹⁰ 5s² 5p⁶"],
+    [56, 2, "[Kr] 4d¹⁰ 5s² 5p⁶"],
+    [82, 2, "[Xe] 4f¹⁴ 5d¹⁰ 6s²"],
+  ] as const)("ion Z=%i q=%i is %s", (z, q, expected) =>
+    expect(configuration(referenceCounts(z, q), true)).toBe(expected),
+  );
+  it("lays the table out as PeriodicTrends does, with La–Lu in their own f row", () => {
+    expect(tablePosition(56)).toEqual({ column: 1, row: 5 }); // Ba, group 2
+    expect(tablePosition(57)).toEqual({ column: 2, row: 6 }); // La starts the lanthanide row under group 3
+    expect(tablePosition(71)).toEqual({ column: 16, row: 6 }); // Lu
+    expect(tablePosition(72)).toEqual({ column: 3, row: 5 }); // Hf, group 4
+    expect(tablePosition(86)).toEqual({ column: 17, row: 5 }); // Rn, group 18
+    expect([1, 2, 39, 50, 64, 80].map(block)).toEqual(["s", "s", "d", "p", "f", "d"]);
+  });
+  it("sizes each table extent: diagram subshells and a prefix of the curated ions", () => {
+    expect([TableExtent.KRYPTON, TableExtent.XENON, TableExtent.RADON].map((e) => e.levels)).toEqual([9, 12, 16]);
+    expect([TableExtent.KRYPTON, TableExtent.XENON, TableExtent.RADON].map((e) => e.ionCount)).toEqual([15, 22, 25]);
+    for (const extent of [TableExtent.KRYPTON, TableExtent.XENON]) {
+      expect(ionsThrough(extent.maxZ)).toEqual(IONS.slice(0, extent.ionCount));
+    }
+    expect(TableExtent.fromMaxZ(54)).toBe(TableExtent.XENON);
+    expect(TableExtent.fromMaxZ(99)).toBe(TableExtent.RADON);
+  });
+  it("narrowing the table clamps Z and the ion, and clears Fill work in subshells no longer drawn", () => {
+    const extent = new Property(TableExtent.RADON);
+    const fill = new ConfigurationModel("fill", extent);
+    fill.zProperty.value = 79;
+    fill.showGround();
+    const ions = new ConfigurationModel("ions", extent);
+    ions.ionIndexProperty.value = IONS.length - 1; // Pb²⁺
+    const patterns = new ConfigurationModel("patterns", extent);
+    patterns.zProperty.value = 64;
+    extent.value = TableExtent.KRYPTON;
+    expect(fill.zProperty.value).toBe(36);
+    expect(fill.zProperty.range.max).toBe(36);
+    expect(fill.countProperty.value).toBe(0);
+    expect(ions.ionIndexProperty.value).toBe(14);
+    expect(ions.zProperty.value).toBe(30); // Zn²⁺, the last krypton-range ion
+    expect(patterns.zProperty.value).toBe(36);
+    expect(electronCount(patterns.diagramProperty.value)).toBe(36);
+    fill.reset(); // reset restores initial ranges, then narrows them again
+    expect(fill.zProperty.range.max).toBe(36);
+    // A diagram that fits the smaller table survives a later widening and narrowing.
+    for (let i = 0; i < 6; i++) {
+      fill.nextElectron();
+    }
+    extent.value = TableExtent.RADON;
+    extent.value = TableExtent.KRYPTON;
+    expect(fill.countProperty.value).toBe(6);
+    for (const m of [fill, ions, patterns]) {
+      m.dispose();
+    }
+    extent.dispose();
+  });
+  it("Patterns notes the subshells each exception changes", () => {
+    const m = new ConfigurationModel("patterns");
+    m.zProperty.value = 64; // Gd: 4f and 5d differ from the prediction
+    expect(m.marksProperty.value.flatMap((mark, i) => (mark === "note" ? [SUBSHELLS[i]?.name] : []))).toEqual([
+      "4f",
+      "5d",
+    ]);
+    m.zProperty.value = 46; // Pd: 5s and 4d
+    expect(m.marksProperty.value.flatMap((mark, i) => (mark === "note" ? [SUBSHELLS[i]?.name] : []))).toEqual([
+      "5s",
+      "4d",
+    ]);
+    m.dispose();
   });
 });
 describe("student actions", () => {
@@ -344,8 +461,9 @@ describe("student actions", () => {
     expect(m.marksProperty.value.every((mark) => mark === null)).toBe(true);
     m.dispose();
   });
-  it("steps through the table, pausing longer on exceptions, and stops at Kr", () => {
-    const m = new ConfigurationModel("patterns");
+  it("steps through the table, pausing longer on exceptions, and stops at the last element", () => {
+    const extent = new Property(TableExtent.RADON);
+    const m = new ConfigurationModel("patterns", extent);
     m.zProperty.value = 23;
     m.autoplayProperty.value = true;
     m.step(1);
@@ -354,11 +472,16 @@ describe("student actions", () => {
     expect(m.zProperty.value).toBe(24);
     m.step(2);
     expect(m.zProperty.value).toBe(25);
+    m.zProperty.value = 86;
+    m.step(1);
+    expect(m.autoplayProperty.value).toBe(false);
+    extent.value = TableExtent.KRYPTON; // the last element follows the table extent
+    m.autoplayProperty.value = true; // restarting at the end starts again from H
+    expect(m.zProperty.value).toBe(1);
     m.zProperty.value = 36;
     m.step(1);
     expect(m.autoplayProperty.value).toBe(false);
-    m.autoplayProperty.value = true; // restarting at the end starts again from H
-    expect(m.zProperty.value).toBe(1);
     m.dispose();
+    extent.dispose();
   });
 });

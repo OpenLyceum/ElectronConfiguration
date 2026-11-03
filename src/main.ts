@@ -41,26 +41,38 @@ onReadyToLaunch(() => {
   const simPreferences = new ElectronConfigurationPreferencesModel();
 
   const screens = [
-    new FillTheOrbitalsScreen({
-      name: stringManager.getScreenNames().fillOrbitalsStringProperty,
-      tandem: Tandem.ROOT.createTandem("fillOrbitalsScreen"),
-      backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
-    }),
-    new PatternsInTheTableScreen({
-      name: stringManager.getScreenNames().periodicPatternsStringProperty,
-      tandem: Tandem.ROOT.createTandem("periodicPatternsScreen"),
-      backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
-    }),
-    new MakeAnIonScreen({
-      name: stringManager.getScreenNames().ionsStringProperty,
-      tandem: Tandem.ROOT.createTandem("ionsScreen"),
-      backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
-    }),
-    new ConfigurationDetectiveScreen({
-      name: stringManager.getScreenNames().configurationDetectiveStringProperty,
-      tandem: Tandem.ROOT.createTandem("configurationDetectiveScreen"),
-      backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
-    }),
+    new FillTheOrbitalsScreen(
+      {
+        name: stringManager.getScreenNames().fillOrbitalsStringProperty,
+        tandem: Tandem.ROOT.createTandem("fillOrbitalsScreen"),
+        backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
+      },
+      simPreferences.tableExtentProperty,
+    ),
+    new PatternsInTheTableScreen(
+      {
+        name: stringManager.getScreenNames().periodicPatternsStringProperty,
+        tandem: Tandem.ROOT.createTandem("periodicPatternsScreen"),
+        backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
+      },
+      simPreferences.tableExtentProperty,
+    ),
+    new MakeAnIonScreen(
+      {
+        name: stringManager.getScreenNames().ionsStringProperty,
+        tandem: Tandem.ROOT.createTandem("ionsScreen"),
+        backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
+      },
+      simPreferences.tableExtentProperty,
+    ),
+    new ConfigurationDetectiveScreen(
+      {
+        name: stringManager.getScreenNames().configurationDetectiveStringProperty,
+        tandem: Tandem.ROOT.createTandem("configurationDetectiveScreen"),
+        backgroundColorProperty: ElectronConfigurationColors.backgroundColorProperty,
+      },
+      simPreferences.tableExtentProperty,
+    ),
   ];
 
   const sim = new Sim(stringManager.getTitleStringProperty(), screens, {

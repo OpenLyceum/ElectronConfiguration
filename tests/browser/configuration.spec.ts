@@ -28,7 +28,8 @@ test("keyboard spin placement on an orbital: cycle, U/D keys, Pauli, Delete, und
 
 test("pointer: drag from the tray, drag between orbitals, Check marks Hund", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("/?screens=1&showHomeScreen=false&ea");
+  // Coordinates below are for the unscaled krypton-sized diagram.
+  await page.goto("/?screens=1&showHomeScreen=false&maxZ=36&ea");
   await expect(page.getByRole("button", { name: "2p, orbital 1: empty", exact: true })).toBeAttached();
   const drag = async (from: [number, number], to: [number, number]) => {
     await page.mouse.move(...from);
@@ -46,6 +47,29 @@ test("pointer: drag from the tray, drag between orbitals, Check marks Hund", asy
   await expect(page.getByRole("button", { name: "2p, orbital 2: one down-spin electron", exact: true })).toBeAttached();
   await page.mouse.click(258, 415);
   await expect(page.getByRole("button", { name: "2p, orbital 2: two paired electrons", exact: true })).toBeAttached();
+});
+
+test("table extent: Rn by default, ?maxZ=54 stops at Xe, and Preferences narrows to Kr live", async ({ page }) => {
+  await page.goto("/?screens=2&showHomeScreen=false&ea");
+  await expect(page.getByRole("button", { name: "86 Rn", exact: true })).toBeAttached();
+  await page.getByRole("button", { name: "64 Gd", exact: true }).press("Space");
+  await expect(page.locator("p").filter({ hasText: "Observed: [Xe] 4f⁷ 5d¹ 6s²" }).first()).toBeAttached();
+  await expect(page.getByRole("button", { name: "4f, orbital 7: one up-spin electron", exact: true })).toBeAttached();
+
+  await page.goto("/?screens=2&showHomeScreen=false&maxZ=54&ea");
+  await expect(page.getByRole("button", { name: "54 Xe", exact: true })).toBeAttached();
+  await expect(page.getByRole("button", { name: "55 Cs", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "4f, orbital 1: empty", exact: true })).toHaveCount(0);
+
+  await page.goto("/?screens=1&showHomeScreen=false&z=79&ea");
+  await page.getByRole("button", { name: "Preferences" }).press("Space");
+  await page.getByRole("tab", { name: "Overview" }).focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await page.locator("ul[role=radiogroup] input").first().press("Space");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("p").filter({ hasText: "Target: Kr · 36 electrons" }).first()).toBeAttached();
+  await expect(page.getByRole("button", { name: "4d, orbital 1: empty", exact: true })).toHaveCount(0);
 });
 
 test("table selects Cr and Cu reference exceptions", async ({ page }) => {

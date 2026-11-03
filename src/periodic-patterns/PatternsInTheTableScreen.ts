@@ -9,11 +9,13 @@
  * icons come from createPatternsInTheTableIcon() in src/common/ElectronConfigurationScreenIcons.ts
  * (see doc/implementation-notes.md).
  */
+import type { TReadOnlyProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
 import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createPatternsInTheTableIcon } from "../common/ElectronConfigurationScreenIcons.js";
+import type { TableExtent } from "../common/model/TableExtent.js";
 import ElectronConfigurationColors from "../ElectronConfigurationColors.js";
 import { PatternsInTheTableModel } from "./model/PatternsInTheTableModel.js";
 import { PatternsInTheTableKeyboardHelpContent } from "./view/PatternsInTheTableKeyboardHelpContent.js";
@@ -21,12 +23,14 @@ import { PatternsInTheTableScreenView } from "./view/PatternsInTheTableScreenVie
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
 type PatternsInTheTableScreenOptions = ScreenOptions & { tandem: Tandem };
+/** Shared preference: how much of the periodic table the sim offers. */
+type ExtentProperty = TReadOnlyProperty<TableExtent>;
 
 export class PatternsInTheTableScreen extends Screen<PatternsInTheTableModel, PatternsInTheTableScreenView> {
-  public constructor(options: PatternsInTheTableScreenOptions) {
+  public constructor(options: PatternsInTheTableScreenOptions, tableExtentProperty?: ExtentProperty) {
     super(
       // Model factory — called once when the screen is first shown
-      () => new PatternsInTheTableModel(),
+      () => new PatternsInTheTableModel(tableExtentProperty),
       // View factory — receives the model instance
       (model) =>
         new PatternsInTheTableScreenView(model, {

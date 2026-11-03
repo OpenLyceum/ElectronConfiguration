@@ -1,6 +1,7 @@
 import { NumberProperty, Property, StringProperty } from "scenerystack/axon";
 import { ConfigurationModel } from "../src/common/model/ConfigurationModel.js";
 import { type Diagram, emptyDiagram } from "../src/common/model/Configurations.js";
+import { TableExtent } from "../src/common/model/TableExtent.js";
 import { ChargeTallyNode } from "../src/common/view/ChargeTallyNode.js";
 import { ConfigurationNode } from "../src/common/view/ConfigurationNode.js";
 import { ConfigurationSummary } from "../src/common/view/ConfigurationSummary.js";
@@ -12,6 +13,15 @@ describeDisposalLeaks(
   (["fill", "patterns", "ions", "detective"] as const).map((kind) => ({
     name: `ConfigurationModel: ${kind}`,
     create: () => new ConfigurationModel(kind),
+  })),
+);
+
+// Models linked to a shared, long-lived table-extent preference must unlink from it on dispose.
+const sharedExtent = new Property(TableExtent.XENON);
+describeDisposalLeaks(
+  (["fill", "patterns", "ions", "detective"] as const).map((kind) => ({
+    name: `ConfigurationModel with shared extent: ${kind}`,
+    create: () => new ConfigurationModel(kind, sharedExtent),
   })),
 );
 
@@ -33,7 +43,8 @@ describeDisposalLeaks([
         selectedProperty: externalSelection,
         marksProperty: externalModel.marksProperty,
         highlightProperty: externalHighlight,
-        insetNode: new ShellNode(externalDiagram, externalZ),
+        insetNode: new ShellNode(externalDiagram, externalZ, 7),
+        levels: TableExtent.RADON.levels,
       }),
   },
   {

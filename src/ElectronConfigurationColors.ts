@@ -121,6 +121,12 @@ const ElectronConfigurationColors = {
     projector: "#a9cbff",
   }),
 
+  /** f-block element buttons (the lanthanide row, La–Lu). */
+  fBlockColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "fBlock", {
+    default: "#f4b6d2",
+    projector: "#f4b6d2",
+  }),
+
   // ── Feedback and particles ───────────────────────────────────────────────────
   // Drawn directly on the screen background, so projector values are darker for contrast on white.
 
