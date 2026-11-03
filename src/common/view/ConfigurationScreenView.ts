@@ -213,7 +213,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       model.kind === "patterns"
         ? new DerivedProperty([previewZProperty, model.zProperty], (preview, z) => fillingSubshell(preview ?? z))
         : null;
-    const shells = new ShellNode(model.diagramProperty, model.zProperty);
+    // The +Z nucleus label would give away an identify challenge.
+    const nucleusZ = new DerivedProperty([model.zProperty, model.identityHiddenProperty], (z, hidden) =>
+      hidden ? null : z,
+    );
+    const shells = new ShellNode(model.diagramProperty, nucleusZ);
     shells.visibleProperty = showShellsProperty;
     const surroundings = model.kind === "ions" ? this.createSurroundings(model) : null;
     const editing = model.kind === "fill" || model.kind === "detective";

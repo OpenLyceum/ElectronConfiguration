@@ -5,6 +5,7 @@ import {
   NumberProperty,
   Property,
   StringUnionProperty,
+  type TReadOnlyProperty,
 } from "scenerystack/axon";
 import { Range } from "scenerystack/dot";
 import query from "../../preferences/electronConfigurationQueryParameters.js";
@@ -73,11 +74,17 @@ export class ConfigurationModel {
   public readonly solvedProperty = new Property<readonly boolean[]>(CHALLENGES.map(() => false));
   /** Patterns: step through the table automatically. */
   public readonly autoplayProperty = new BooleanProperty(false);
+  /** Detective: true while an identify challenge hides the element, so no view may show Z or its symbol. */
+  public readonly identityHiddenProperty: TReadOnlyProperty<boolean>;
   private history: Diagram[] = [];
   private revealed = false;
   private autoplayElapsed = 0;
   public constructor(kind: ScreenKind) {
     this.kind = kind;
+    this.identityHiddenProperty = new DerivedProperty(
+      [this.challengeIndexProperty],
+      () => kind === "detective" && this.challenge?.kind === "identify",
+    );
     this.zProperty.lazyLink(() => {
       if (kind === "patterns") {
         this.chargeProperty.value = 0;
@@ -86,8 +93,10 @@ export class ConfigurationModel {
         this.marksProperty.value = exceptionMarks(this.zProperty.value);
       } else if (kind === "fill") {
         // Changing the target keeps the student's diagram (and undo history), so they can build C, then step
-        // Z up to N and add one more electron — walking the table one element at a time.
+        // Z up to N and add one more electron — walking the table one element at a time. Check marks were
+        // graded against the old target, so they go.
         this.messageProperty.value = "ready";
+        this.marksProperty.value = noMarks();
       }
     });
     this.ionIndexProperty.lazyLink(() => {
@@ -316,6 +325,7 @@ export class ConfigurationModel {
   }
   public dispose(): void {
     this.countProperty.dispose();
+    this.identityHiddenProperty.dispose();
     this.zProperty.dispose();
     this.chargeProperty.dispose();
     this.diagramProperty.dispose();

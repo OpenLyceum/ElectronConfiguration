@@ -1,3 +1,5 @@
+import { Property } from "scenerystack/axon";
+import { Text } from "scenerystack/scenery";
 import { describe, expect, it } from "vitest";
 import { ConfigurationModel } from "../src/common/model/ConfigurationModel.js";
 import {
@@ -17,7 +19,7 @@ import {
   species,
   subshellCounts,
 } from "../src/common/model/Configurations.js";
-import { shellCounts } from "../src/common/view/ShellNode.js";
+import { ShellNode, shellCounts } from "../src/common/view/ShellNode.js";
 
 describe("reference configurations", () => {
   it.each(Array.from({ length: 36 }, (_, i) => i + 1))("neutral Z=%i conserves electrons and follows Hund", (z) => {
@@ -301,6 +303,37 @@ describe("student actions", () => {
     expect(m.marksProperty.value.slice(0, 4)).toEqual(["ok", "ok", "fault", null]);
     m.cycle(3);
     expect(m.marksProperty.value.every((mark) => mark === null)).toBe(true);
+    m.dispose();
+  });
+  it("clears Check marks when the Fill target changes", () => {
+    const m = new ConfigurationModel("fill"); // C
+    for (let i = 0; i < 6; i++) {
+      m.nextElectron();
+    }
+    m.check();
+    expect(m.marksProperty.value.some((mark) => mark === "ok")).toBe(true);
+    m.zProperty.value = 7; // the marks graded C, not N
+    expect(m.marksProperty.value.every((mark) => mark === null)).toBe(true);
+    m.dispose();
+  });
+  it("hides the element on identify challenges, including the shell view's nucleus label", () => {
+    const m = new ConfigurationModel("detective");
+    const identify = CHALLENGES.findIndex((c) => c.kind === "identify");
+    expect(m.identityHiddenProperty.value).toBe(false);
+    m.challengeIndexProperty.value = identify;
+    expect(m.identityHiddenProperty.value).toBe(true);
+    const fill = new ConfigurationModel("fill");
+    expect(fill.identityHiddenProperty.value).toBe(false);
+    fill.dispose();
+    const labels = (z: number | null) => {
+      const node = new ShellNode(m.diagramProperty, new Property<number | null>(z));
+      const result = node.children[0]?.children.flatMap((c) => (c instanceof Text ? [c.string] : []));
+      node.dispose();
+      return result;
+    };
+    expect(labels(12)).toContain("+12");
+    expect(labels(null)).toContain("+?");
+    expect(labels(null)).not.toContain("+12");
     m.dispose();
   });
   it("notes the 4s and 3d subshells for Cr and Cu on Patterns", () => {

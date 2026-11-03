@@ -1,6 +1,6 @@
 /**
  * ShellNode — an optional counting view: electrons grouped by principal quantum number n around a
- * nucleus labelled with its charge.
+ * nucleus labelled with its charge ("+?" while the element is hidden).
  *
  * Deliberately labelled as a counting view, not orbits: rings are evenly spaced and electrons are spread
  * evenly around each ring, with no implied radius, path or energy. It complements the orbital diagram for
@@ -30,7 +30,7 @@ export function shellCounts(diagram: Diagram): number[] {
 
 export class ShellNode extends VBox {
   private readonly disposeShellNode: () => void;
-  public constructor(diagramProperty: TReadOnlyProperty<Diagram>, zProperty: TReadOnlyProperty<number>) {
+  public constructor(diagramProperty: TReadOnlyProperty<Diagram>, zProperty: TReadOnlyProperty<number | null>) {
     const strings = StringManager.getInstance().getStrings();
     const atom = new Node();
     const caption = new Text(strings.common.shellCaptionStringProperty, {
@@ -82,7 +82,7 @@ export class ShellNode extends VBox {
       }
       children.push(new Circle(NUCLEUS_RADIUS, { fill: Colors.protonColorProperty }));
       children.push(
-        new Text(`+${z}`, {
+        new Text(`+${z ?? "?"}`, {
           font: new PhetFont({ size: 13, weight: "bold" }),
           fill: Colors.controlSurfaceTextColorProperty,
           centerX: 0,
