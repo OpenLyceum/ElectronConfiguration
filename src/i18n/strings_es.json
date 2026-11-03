@@ -10,9 +10,6 @@
     "element": "Número atómico Z",
     "selected": "Selección: {{orbital}}",
     "orbital": "{{subshell}}, orbital {{index}}: {{state}}",
-    "addUp": "Añadir ↑",
-    "addDown": "Añadir ↓",
-    "remove": "Quitar electrón",
     "undo": "Deshacer",
     "clear": "Vaciar diagrama",
     "nextElectron": "Siguiente electrón",
@@ -22,19 +19,15 @@
     "full": "Configuración completa",
     "short": "Notación de gas noble",
     "target": "Objetivo: {{species}} · {{electrons}} electrones",
-    "placed": "Diagrama: {{count}} electrones",
     "schematic": "Las filas siguen una guía de llenado, sin separaciones de energía medidas. Las flechas indican proyecciones de espín.",
     "capacity": "s: 1 orbital / 2 electrones · p: 3 / 6 · d: 5 / 10",
     "rules": "Pauli: como máximo dos flechas opuestas por orbital. Hund: ocupar por separado los orbitales de igual energía con flechas paralelas antes de emparejar. Aufbau es una guía con excepciones observadas.",
     "core": "Electrones de capas internas: {{core}} · capa más externa: {{outer}}",
     "transition": "En la química del bloque d, los electrones d también pueden participar en enlaces.",
-    "prediction": "Predicción de la guía: {{configuration}}",
     "exception": "La referencia observada difiere de la guía simple (Cr, Cu). Importan las interacciones electrónicas; el diagrama no calcula energías.",
-    "same": "La guía coincide con esta configuración de referencia.",
     "ion": "Elegir un ion",
     "addElectron": "Ganar un electrón",
     "loseElectron": "Perder un electrón",
-    "charge": "Protones: {{z}} · electrones: {{electrons}} · carga: {{charge}}",
     "neutral": "Átomo neutro",
     "ionRule": "El núcleo permanece fijo. Los cationes pierden electrones; los aniones los ganan. Para estos cationes metálicos, quitar ns antes de (n−1)d.",
     "ionScope": "Modelo de configuraciones de iones comunes; no predice la estabilidad de un ion aislado.",
@@ -42,13 +35,31 @@
     "groundChoice": "Llenado fundamental",
     "higherChoice": "Permitido, pero no el llenado fundamental",
     "unknown": "Elemento desconocido",
-    "help": "Selecciona un orbital y usa Añadir ↑ o Añadir ↓. Pauli bloque un espín duplicado. Siguiente electrón reconstruye un llenado guiado con el número actual.",
+    "help": "Haga clic en un orbital para alternarlo: vacío → ↑ → ↑↓ → vacío. Arrastre ↑ o ↓ desde la bandeja a un orbital, arrastre una flecha a otro orbital, o fuera del diagrama para quitarla. Teclado: Espacio alterna, U añade ↑, D añade ↓, Supr quita.",
     "mobile": {
       "scroll": "Desplazar la página",
       "help": "Use la barra, la rueda o deslice fuera de los controles. El foco del teclado muestra los controles.",
       "screen": "Pantalla"
     },
-    "current": "Actual: {{species}} · {{electrons}} electrones"
+    "current": "Actual: {{species}} · {{electrons}} electrones",
+    "targetSpecies": "Objetivo: {{species}}",
+    "sBlock": "bloque s",
+    "pBlock": "bloque p",
+    "dBlock": "bloque d",
+    "energyAxis": "Energía (esquemática)",
+    "tray": "Arrastre un electrón",
+    "surroundings": "Entorno",
+    "info": "Acerca de esta pantalla",
+    "shells": "Mostrar electrones por capa",
+    "shellCaption": "Electrones agrupados por capa n. Una vista para contar, no órbitas.",
+    "autoplay": "Recorrer la tabla",
+    "preview": "{{species}} · Z = {{z}} · llena {{subshell}}",
+    "protons": "Protones",
+    "electrons": "Electrones",
+    "netCharge": "Carga neta {{charge}}",
+    "progress": "Resueltos {{solved}} de {{total}}",
+    "observed": "Observado:",
+    "predicted": "Regla de llenado:"
   },
   "messages": {
     "ready": "Explore el diagrama o compruebe su predicción.",
@@ -59,7 +70,12 @@
     "ground": "Coincide con el llenado fundamental. Se aceptan orbitales equivalentes y flechas de espín invertidas.",
     "correct": "Correcto.",
     "again": "Inténtelo de nuevo. Compare las cantidades de electrones o las reglas de llenado.",
-    "solution": "Referencia fundamental mostrada."
+    "solution": "Referencia fundamental mostrada.",
+    "explore": "Elija un elemento para comparar su configuración de referencia con la predicción de la regla de llenado.",
+    "ionReady": "Gane o pierda electrones de uno en uno hasta que el diagrama muestre el ion objetivo.",
+    "choose": "Elija una respuesta.",
+    "limit": "Ese paso iría más allá del ion objetivo o del átomo neutro. Pruebe el otro botón.",
+    "anomaly": "Último electrón colocado. El estado fundamental observado reorganiza los electrones 4s y 3d respecto a la regla de llenado simple."
   },
   "lessons": {
     "fill": "Construir un diagrama orbital",
@@ -71,7 +87,8 @@
     "repair": "Repare el diagrama para obtener el llenado fundamental.",
     "identify": "¿Qué elemento neutro tiene esta configuración?",
     "isoelectronic": "¿Qué átomo neutro tiene el mismo número de electrones que este ion?",
-    "classify": "¿Coincide este diagrama con el llenado fundamental?"
+    "classify": "¿Coincide este diagrama con el llenado fundamental?",
+    "move": "Un electrón está en el orbital equivocado. Arrástrelo a su lugar y luego compruebe."
   },
   "states": {
     "empty": "vacío",
@@ -87,5 +104,12 @@
     "play": "Las casillas muestran ocupación y proyecciones de espín. La notación sigue al diagrama.",
     "controls": "Elija un elemento o ion, seleccione casillas y use los botones con nombre. Reiniciar restaura esta pantalla.",
     "details": "Objetivo {{species}}, Z={{z}}, carga={{charge}}. Diagrama: {{count}} electrones. Configuración {{configuration}}. {{status}}"
+  },
+  "keyboard": {
+    "heading": "Diagrama de orbitales",
+    "cycle": "Alternar vacío, ↑, ↑↓",
+    "up": "Añadir un electrón de espín arriba",
+    "down": "Añadir un electrón de espín abajo",
+    "remove": "Quitar un electrón"
   }
 }

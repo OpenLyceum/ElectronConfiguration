@@ -32,13 +32,15 @@ export function fillingPrediction(electrons: number): number[] {
   }
   return result;
 }
+/** Neutral atoms whose observed ground state differs from the simple filling rule (within H–Kr). */
+export const isFillingException = (z: number): boolean => z === 24 || z === 29;
 export function referenceCounts(z: number, charge = 0): number[] {
   if (!Number.isInteger(z) || z < 1 || z > 36 || !Number.isInteger(charge) || z - charge < 0 || z - charge > 38) {
     throw new Error("Unsupported atomic number or electron count");
   }
   const result = fillingPrediction(z);
   // Neutral reference exceptions, checked against NIST atomic data; not inferred from a half-filled slogan.
-  if (z === 24 || z === 29) {
+  if (isFillingException(z)) {
     result[5] = (result[5] ?? 0) - 1;
     result[6] = (result[6] ?? 0) + 1;
   }
@@ -84,17 +86,50 @@ export function diagramForCounts(counts: readonly number[], limit = Infinity): n
   return result;
 }
 export const referenceDiagram = (z: number, charge = 0): number[] => diagramForCounts(referenceCounts(z, charge));
-export function followsHund(diagram: Diagram): boolean {
-  return SUBSHELLS.every((s, index) => {
-    const bits = diagram.filter((_, i) => ORBITALS[i]?.subshell === index);
-    const count = electronCount(bits),
-      g = 2 * s.l + 1;
-    const singles = bits.filter((b) => b === 1 || b === 2);
-    return (
-      singles.length === Math.min(count, 2 * g - count) &&
-      (singles.every((b) => b === 1) || singles.every((b) => b === 2))
-    );
+/**
+ * One step of guided (aufbau) construction toward neutral element z: intermediate electron counts follow
+ * the simple filling rule, and the final step shows the observed reference (so Cr and Cu rearrange last).
+ */
+export function guidedDiagram(z: number, electrons: number): number[] {
+  const count = Math.max(0, Math.min(electrons, z));
+  return count >= z ? referenceDiagram(z) : diagramForCounts(fillingPrediction(count));
+}
+const S_BLOCK = new Set([1, 2, 3, 4, 11, 12, 19, 20]);
+/** Periodic-table block (s, p or d) of element z within H–Kr; He is placed in the s block. */
+export const block = (z: number): "s" | "p" | "d" => (S_BLOCK.has(z) ? "s" : z >= 21 && z <= 30 ? "d" : "p");
+/** Orbital indices (into ORBITALS / a Diagram) belonging to each subshell. */
+export const SUBSHELL_ORBITALS: readonly (readonly number[])[] = SUBSHELLS.map((_, subshell) =>
+  ORBITALS.flatMap((o, i) => (o.subshell === subshell ? [i] : [])),
+);
+/** Hund's rule within one subshell: maximum unpaired electrons, all with parallel spin projections. */
+export function subshellFollowsHund(diagram: Diagram, subshell: number): boolean {
+  const bits = (SUBSHELL_ORBITALS[subshell] ?? []).map((i) => diagram[i] ?? 0);
+  const count = electronCount(bits),
+    g = bits.length;
+  const singles = bits.filter((b) => b === 1 || b === 2);
+  return (
+    singles.length === Math.min(count, 2 * g - count) &&
+    (singles.every((b) => b === 1) || singles.every((b) => b === 2))
+  );
+}
+export const followsHund = (diagram: Diagram): boolean =>
+  SUBSHELLS.every((_, subshell) => subshellFollowsHund(diagram, subshell));
+/** Per-subshell feedback drawn on the diagram: "fault" (wrong count or Hund), "ok", or a neutral "note". */
+export type SubshellMark = "ok" | "fault" | "note" | null;
+export function subshellMarks(diagram: Diagram, z: number, charge = 0): SubshellMark[] {
+  const actual = subshellCounts(diagram),
+    expected = referenceCounts(z, charge);
+  return SUBSHELLS.map((_, i) => {
+    if (actual[i] !== expected[i] || !subshellFollowsHund(diagram, i)) {
+      return "fault";
+    }
+    return (actual[i] ?? 0) > 0 ? "ok" : null;
   });
+}
+export const noMarks = (): SubshellMark[] => SUBSHELLS.map(() => null);
+/** Marks the 4s and 3d subshells, where Cr and Cu depart from the simple filling rule. */
+export function exceptionMarks(z: number): SubshellMark[] {
+  return SUBSHELLS.map((s) => (isFillingException(z) && (s.name === "4s" || s.name === "3d") ? "note" : null));
 }
 export type Assessment = "count" | "higher" | "hund" | "ground";
 export function assess(diagram: Diagram, z: number, charge = 0): Assessment {
@@ -109,12 +144,23 @@ export function assess(diagram: Diagram, z: number, charge = 0): Assessment {
   return followsHund(diagram) ? "ground" : "hund";
 }
 const SUPER = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-export function configuration(counts: readonly number[], abbreviated = false): string {
+const toSuperscript = (digits: string): string =>
+  digits
+    .split("")
+    .map((d) => SUPER[Number(d)])
+    .join("");
+/** One term of a configuration: a noble-gas core like [Ar], or a subshell term like 3d⁶. */
+export type ConfigurationPart =
+  | { kind: "core"; text: string }
+  | { kind: "term"; text: string; subshell: number; l: number; count: number };
+export function configurationParts(counts: readonly number[], abbreviated = false): ConfigurationPart[] {
   let core = 0;
   if (abbreviated) {
+    const total = counts.reduce((sum, n) => sum + n, 0);
+    // The core must be strictly smaller than the species, so Ne reads [He] 2s² 2p⁶ rather than a circular [Ne].
     for (const candidate of [2, 10, 18, 36]) {
       const c = referenceCounts(candidate);
-      if (c.every((n, i) => n <= (counts[i] ?? 0))) {
+      if (candidate < total && c.every((n, i) => n <= (counts[i] ?? 0))) {
         core = candidate;
       }
     }
@@ -123,18 +169,21 @@ export function configuration(counts: readonly number[], abbreviated = false): s
   const indices = SUBSHELLS.map((_, i) => i).sort(
     (a, b) => (SUBSHELLS[a]?.n ?? 0) - (SUBSHELLS[b]?.n ?? 0) || (SUBSHELLS[a]?.l ?? 0) - (SUBSHELLS[b]?.l ?? 0),
   );
-  const parts = indices.flatMap((i) => {
+  const terms = indices.flatMap((i): ConfigurationPart[] => {
     const count = (counts[i] ?? 0) - (baseline[i] ?? 0);
-    return count > 0
-      ? [
-          `${SUBSHELLS[i]?.name}${String(count)
-            .split("")
-            .map((d) => SUPER[Number(d)])
-            .join("")}`,
-        ]
+    const s = SUBSHELLS[i];
+    return count > 0 && s
+      ? [{ kind: "term", text: `${s.name}${toSuperscript(String(count))}`, subshell: i, l: s.l, count }]
       : [];
   });
-  return [core > 0 ? `[${SYMBOLS[core - 1]}]` : "", ...parts].filter(Boolean).join(" ") || "—";
+  return core > 0 ? [{ kind: "core", text: `[${SYMBOLS[core - 1]}]` }, ...terms] : terms;
+}
+export function configuration(counts: readonly number[], abbreviated = false): string {
+  return (
+    configurationParts(counts, abbreviated)
+      .map((p) => p.text)
+      .join(" ") || "—"
+  );
 }
 export const IONS = [
   { z: 11, q: 1 },
@@ -153,21 +202,79 @@ export const IONS = [
   { z: 29, q: 2 },
   { z: 30, q: 2 },
 ] as const;
+/** Chemical notation with a superscript charge, e.g. Na⁺, Fe³⁺, O²⁻. */
 export function species(z: number, q = 0): string {
-  return `${SYMBOLS[z - 1] ?? "?"}${q === 0 ? "" : `${Math.abs(q) === 1 ? "" : Math.abs(q)}${q > 0 ? "+" : "−"}`}`;
+  const magnitude = Math.abs(q) === 1 ? "" : toSuperscript(String(Math.abs(q)));
+  return `${SYMBOLS[z - 1] ?? "?"}${q === 0 ? "" : `${magnitude}${q > 0 ? "⁺" : "⁻"}`}`;
 }
+/** Signed charge with a true minus sign: 0, +2, −1. */
+export const formatCharge = (q: number): string => (q > 0 ? `+${q}` : q < 0 ? `−${-q}` : "0");
+/**
+ * A Configuration Detective task. Repair/move/classify challenges start from the reference diagram with
+ * `edits` applied ([orbital index, occupancy bits]); `fillingRule` starts from the simple filling-rule
+ * prediction instead (Cu). Orbital indices: 0 1s · 1 2s · 2–4 2p · 5 3s · 6–8 3p · 9 4s · 10–14 3d.
+ */
 export type Challenge = {
-  kind: "repair" | "identify" | "isoelectronic" | "classify";
+  kind: "repair" | "move" | "identify" | "isoelectronic" | "classify";
   z: number;
   q: number;
-  fault?: "pair" | "spin" | "promote" | "copper";
+  edits?: readonly (readonly [number, number])[];
+  fillingRule?: boolean;
   options?: readonly number[];
 };
 export const CHALLENGES: readonly Challenge[] = [
-  { kind: "repair", z: 6, q: 0, fault: "pair" },
-  { kind: "repair", z: 7, q: 0, fault: "spin" },
-  { kind: "classify", z: 8, q: 0, fault: "promote" },
+  // C: two 2p electrons paired instead of spread out (Hund).
+  {
+    kind: "repair",
+    z: 6,
+    q: 0,
+    edits: [
+      [2, 3],
+      [3, 0],
+    ],
+  },
+  // N: one 2p arrow reversed (Hund, parallel spins).
+  { kind: "repair", z: 7, q: 0, edits: [[3, 2]] },
+  // O: a 2p electron promoted to 3s — allowed but excited.
+  {
+    kind: "classify",
+    z: 8,
+    q: 0,
+    edits: [
+      [2, 1],
+      [5, 1],
+    ],
+  },
+  // Na: the valence electron placed in 3p instead of 3s.
+  {
+    kind: "move",
+    z: 11,
+    q: 0,
+    edits: [
+      [5, 0],
+      [6, 1],
+    ],
+  },
   { kind: "identify", z: 12, q: 0, options: [10, 12, 13] },
   { kind: "isoelectronic", z: 11, q: 1, options: [10, 11, 18] },
-  { kind: "repair", z: 29, q: 0, fault: "copper" },
+  // K: the 19th electron placed in 3d instead of 4s.
+  {
+    kind: "move",
+    z: 19,
+    q: 0,
+    edits: [
+      [9, 0],
+      [10, 1],
+    ],
+  },
+  // Cu: the filling-rule prediction 3d⁹ 4s² instead of the observed 3d¹⁰ 4s¹.
+  { kind: "repair", z: 29, q: 0, fillingRule: true },
 ];
+/** The starting diagram for a challenge. */
+export function challengeDiagram(c: Challenge): number[] {
+  const diagram = c.fillingRule ? diagramForCounts(fillingPrediction(c.z - c.q)) : referenceDiagram(c.z, c.q);
+  for (const [index, bits] of c.edits ?? []) {
+    diagram[index] = bits;
+  }
+  return diagram;
+}

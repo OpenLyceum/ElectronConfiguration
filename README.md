@@ -4,11 +4,11 @@ Build orbital diagrams, discover periodic-table patterns, form common ions, and 
 
 ## Features
 
-- **Fill the Orbitals:** manual spin placement, Pauli feedback, undo, guided filling, and ground-state checks.
-- **Patterns in the Table:** H–Kr, full and noble-gas notation, inner/outer shell counts, and Cr/Cu reference exceptions.
-- **Make an Ion:** fifteen common ions, a fixed nucleus, neutral comparison, and 4s-before-3d removal.
-- **Configuration Detective:** six repair, identify, isoelectronic, and classification challenges.
-- English, French, Spanish, keyboard access, live screen summaries, projector colors, and portrait scrolling.
+- **Fill the Orbitals:** an energy-staircase orbital diagram you edit directly (click to cycle, drag electrons from a tray or between orbitals, U/D/Delete on the keyboard), Pauli shake, per-subshell feedback after Check, undo, and guided filling.
+- **Patterns in the Table:** a block-coloured table (H–Kr) with hover preview, "Step through the table" autoplay that pauses on the Cr/Cu exceptions, observed vs. filling-rule notation, and inner/outer shell counts.
+- **Make an Ion:** fifteen common ions, proton/electron tallies, electrons animated to and from the surroundings (4s empties before 3d), and a neutral comparison.
+- **Configuration Detective:** eight repair, move-the-misplaced-electron, identify, isoelectronic, and classification challenges, with large answer tiles and a star per solved challenge.
+- Block-tinted configuration chips, an optional count-by-shell view, rules in per-screen info dialogs, English/French/Spanish, keyboard access, live screen summaries, projector colors, and portrait scrolling.
 
 This is a symbolic occupancy model. It checks introductory configuration and Hund patterns, not complete atomic term states. See [model and sources](doc/model.md).
 

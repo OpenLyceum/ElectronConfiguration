@@ -1,20 +1,50 @@
-import { BooleanProperty, DerivedProperty, NumberProperty, Property, StringUnionProperty } from "scenerystack/axon";
+import {
+  BooleanProperty,
+  DerivedProperty,
+  Emitter,
+  NumberProperty,
+  Property,
+  StringUnionProperty,
+} from "scenerystack/axon";
 import { Range } from "scenerystack/dot";
 import query from "../../preferences/electronConfigurationQueryParameters.js";
 import {
   assess,
   CHALLENGES,
+  challengeDiagram,
   type Diagram,
-  diagramForCounts,
   electronCount,
   emptyDiagram,
-  fillingPrediction,
+  exceptionMarks,
+  guidedDiagram,
   IONS,
+  isFillingException,
+  noMarks,
   ORBITALS,
-  referenceCounts,
   referenceDiagram,
+  type SubshellMark,
+  subshellMarks,
 } from "./Configurations.js";
 export type ScreenKind = "fill" | "patterns" | "ions" | "detective";
+export const MESSAGES = [
+  "ready",
+  "pauli",
+  "count",
+  "higher",
+  "hund",
+  "ground",
+  "correct",
+  "again",
+  "solution",
+  "limit",
+  "anomaly",
+] as const;
+export type Message = (typeof MESSAGES)[number];
+const sameDiagram = (a: Diagram, b: Diagram): boolean => a.length === b.length && a.every((bits, i) => bits === b[i]);
+/** Seconds per element while stepping through the table, and the longer pause on Cr and Cu. */
+const AUTOPLAY_STEP = 0.9;
+const AUTOPLAY_EXCEPTION_PAUSE = 2.6;
+export type Spin = 1 | 2;
 export class ConfigurationModel {
   public readonly kind: ScreenKind;
   public readonly zProperty = new NumberProperty(query.z, { range: new Range(1, 36), numberType: "Integer" });
@@ -33,18 +63,31 @@ export class ConfigurationModel {
     range: new Range(0, CHALLENGES.length - 1),
     numberType: "Integer",
   });
-  public readonly messageProperty = new StringUnionProperty<
-    "ready" | "pauli" | "count" | "higher" | "hund" | "ground" | "correct" | "again" | "solution"
-  >("ready", { validValues: ["ready", "pauli", "count", "higher", "hund", "ground", "correct", "again", "solution"] });
+  public readonly messageProperty = new StringUnionProperty<Message>("ready", { validValues: MESSAGES });
   public readonly countProperty = new DerivedProperty([this.diagramProperty], electronCount);
+  /** Per-subshell feedback drawn on the diagram after Check (and the Cr/Cu note on Patterns). */
+  public readonly marksProperty = new Property<readonly SubshellMark[]>(noMarks());
+  /** Fires with the orbital index when Pauli blocks an electron, so the view can shake that box. */
+  public readonly pauliEmitter = new Emitter<[number]>({ parameters: [{ valueType: "number" }] });
+  /** Detective: which challenges have been solved without revealing the answer. */
+  public readonly solvedProperty = new Property<readonly boolean[]>(CHALLENGES.map(() => false));
+  /** Patterns: step through the table automatically. */
+  public readonly autoplayProperty = new BooleanProperty(false);
   private history: Diagram[] = [];
+  private revealed = false;
+  private autoplayElapsed = 0;
   public constructor(kind: ScreenKind) {
     this.kind = kind;
     this.zProperty.lazyLink(() => {
-      if (kind === "fill" || kind === "patterns") {
+      if (kind === "patterns") {
         this.chargeProperty.value = 0;
         this.clearHistory();
-        this.diagramProperty.value = kind === "fill" ? emptyDiagram() : referenceDiagram(this.zProperty.value);
+        this.diagramProperty.value = referenceDiagram(this.zProperty.value);
+        this.marksProperty.value = exceptionMarks(this.zProperty.value);
+      } else if (kind === "fill") {
+        // Changing the target keeps the student's diagram (and undo history), so they can build C, then step
+        // Z up to N and add one more electron — walking the table one element at a time.
+        this.messageProperty.value = "ready";
       }
     });
     this.ionIndexProperty.lazyLink(() => {
@@ -57,6 +100,12 @@ export class ConfigurationModel {
         this.loadChallenge();
       }
     });
+    this.autoplayProperty.lazyLink((playing) => {
+      this.autoplayElapsed = 0;
+      if (playing && this.zProperty.value >= this.zProperty.range.max) {
+        this.zProperty.value = this.zProperty.range.min;
+      }
+    });
     this.initialize();
   }
   public get challenge() {
@@ -65,14 +114,18 @@ export class ConfigurationModel {
   private clearHistory(): void {
     this.history = [];
     this.messageProperty.value = "ready";
+    this.marksProperty.value = noMarks();
   }
   private initialize(): void {
     if (this.kind === "ions") {
       this.loadIon();
     } else if (this.kind === "detective") {
       this.loadChallenge();
+    } else if (this.kind === "patterns") {
+      this.diagramProperty.value = referenceDiagram(this.zProperty.value);
+      this.marksProperty.value = exceptionMarks(this.zProperty.value);
     } else {
-      this.diagramProperty.value = this.kind === "patterns" ? referenceDiagram(this.zProperty.value) : emptyDiagram();
+      this.diagramProperty.value = emptyDiagram();
     }
   }
   private loadIon(): void {
@@ -91,72 +144,114 @@ export class ConfigurationModel {
     }
     this.zProperty.value = c.z;
     this.chargeProperty.value = c.q;
-    let diagram = referenceDiagram(c.z, c.q);
-    if (c.fault === "pair") {
-      diagram[2] = 3;
-      diagram[3] = 0;
-    }
-    if (c.fault === "spin") {
-      diagram[3] = 2;
-    }
-    if (c.fault === "promote") {
-      diagram[2] = 1;
-      diagram[5] = 1;
-    }
-    if (c.fault === "copper") {
-      diagram = diagramForCounts(fillingPrediction(29));
-    }
-    this.diagramProperty.value = diagram;
+    this.diagramProperty.value = challengeDiagram(c);
+    this.revealed = false;
     this.clearHistory();
   }
-  public add(spin: 1 | 2): void {
-    const index = this.selectedProperty.value,
-      bits = this.diagramProperty.value[index] ?? 0;
+  private bitsAt(index: number): number {
+    return this.diagramProperty.value[index] ?? 0;
+  }
+  private rejectPauli(index: number): void {
+    this.messageProperty.value = "pauli";
+    this.pauliEmitter.emit(index);
+  }
+  /** Adds an electron with the given spin projection to an orbital; Pauli blocks a duplicate. */
+  public place(index: number, spin: Spin): void {
+    this.selectedProperty.value = index;
+    const bits = this.bitsAt(index);
     if (bits & spin) {
-      this.messageProperty.value = "pauli";
+      this.rejectPauli(index);
       return;
     }
     this.change(index, bits | spin);
   }
-  public remove(): void {
-    const index = this.selectedProperty.value,
-      bits = this.diagramProperty.value[index] ?? 0;
-    this.change(index, bits === 3 ? 1 : 0);
+  /** Click/tap on an orbital box: empty → ↑ → ↑↓ → empty. */
+  public cycle(index: number): void {
+    this.selectedProperty.value = index;
+    const bits = this.bitsAt(index);
+    this.change(index, bits === 0 ? 1 : bits === 3 ? 0 : 3);
+  }
+  /** Removes one electron (the ↓ of a pair first). */
+  public removeOne(index: number): void {
+    this.selectedProperty.value = index;
+    const bits = this.bitsAt(index);
+    if (bits !== 0) {
+      this.change(index, bits === 3 ? 1 : 0);
+    }
+  }
+  /** The spin projection a drag picks up from an orbital: the ↓ of a pair, otherwise its only electron. */
+  public carriedSpin(index: number): Spin | null {
+    const bits = this.bitsAt(index);
+    return bits === 0 ? null : bits === 1 ? 1 : 2;
+  }
+  /** Drags one electron from one orbital to another as a single undoable edit. */
+  public move(from: number, to: number): void {
+    const spin = this.carriedSpin(from);
+    if (spin === null || from === to) {
+      return;
+    }
+    this.selectedProperty.value = to;
+    if (this.bitsAt(to) & spin) {
+      this.rejectPauli(to);
+      return;
+    }
+    const next = this.diagramProperty.value.slice();
+    next[from] = this.bitsAt(from) & ~spin;
+    next[to] = this.bitsAt(to) | spin;
+    this.commit(next);
   }
   private change(index: number, bits: number): void {
-    this.history.push(this.diagramProperty.value);
     const next = this.diagramProperty.value.slice();
     next[index] = bits;
-    this.diagramProperty.value = next;
-    this.messageProperty.value = "ready";
+    this.commit(next);
+  }
+  /** Records an undoable edit; a no-op edit leaves the undo history untouched. */
+  private commit(next: Diagram, message: Message = "ready"): void {
+    if (!sameDiagram(next, this.diagramProperty.value)) {
+      this.history.push(this.diagramProperty.value);
+      this.diagramProperty.value = next;
+      this.marksProperty.value = noMarks();
+    }
+    this.messageProperty.value = message;
   }
   public undo(): void {
     const previous = this.history.pop();
     if (previous) {
       this.diagramProperty.value = previous;
       this.messageProperty.value = "ready";
+      this.marksProperty.value = noMarks();
     }
   }
   public clear(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = emptyDiagram();
-    this.messageProperty.value = "ready";
+    this.commit(emptyDiagram());
   }
+  /**
+   * Guided aufbau step: rebuilds the diagram with one more electron by the simple filling rule. The final
+   * step shows the observed reference, so for Cr and Cu the 4s/3d rearrangement appears on the last press.
+   */
   public nextElectron(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = diagramForCounts(
-      referenceCounts(this.zProperty.value),
-      Math.min(this.countProperty.value + 1, this.zProperty.value),
-    );
-    this.messageProperty.value = "ready";
+    const z = this.zProperty.value,
+      count = Math.min(this.countProperty.value + 1, z);
+    this.commit(guidedDiagram(z, count), count === z && isFillingException(z) ? "anomaly" : "ready");
   }
   public showGround(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = referenceDiagram(this.zProperty.value, this.chargeProperty.value);
-    this.messageProperty.value = "solution";
+    this.revealed = true;
+    this.commit(referenceDiagram(this.zProperty.value, this.chargeProperty.value), "solution");
   }
   public check(): void {
-    this.messageProperty.value = assess(this.diagramProperty.value, this.zProperty.value, this.chargeProperty.value);
+    const z = this.zProperty.value,
+      q = this.chargeProperty.value,
+      result = assess(this.diagramProperty.value, z, q);
+    this.messageProperty.value = result;
+    this.marksProperty.value = subshellMarks(this.diagramProperty.value, z, q);
+    if (this.kind === "detective" && result === "ground" && !this.revealed) {
+      this.markSolved();
+    }
+  }
+  private markSolved(): void {
+    const solved = this.solvedProperty.value.slice();
+    solved[this.challengeIndexProperty.value] = true;
+    this.solvedProperty.value = solved;
   }
   public moveIon(direction: -1 | 1): void {
     const ion = IONS[this.ionIndexProperty.value];
@@ -165,6 +260,7 @@ export class ConfigurationModel {
     }
     const next = this.chargeProperty.value + direction;
     if (next < Math.min(0, ion.q) || next > Math.max(0, ion.q)) {
+      this.messageProperty.value = "limit";
       return;
     }
     this.chargeProperty.value = next;
@@ -183,6 +279,9 @@ export class ConfigurationModel {
           ? value === c.z - c.q
           : value === (assess(this.diagramProperty.value, c.z, c.q) === "ground" ? 0 : 1);
     this.messageProperty.value = correct ? "correct" : "again";
+    if (correct) {
+      this.markSolved();
+    }
   }
   public nextChallenge(): void {
     this.challengeIndexProperty.value = (this.challengeIndexProperty.value + 1) % CHALLENGES.length;
@@ -194,11 +293,26 @@ export class ConfigurationModel {
     this.detailsProperty.reset();
     this.ionIndexProperty.reset();
     this.challengeIndexProperty.reset();
+    this.solvedProperty.reset();
+    this.autoplayProperty.reset();
     this.clearHistory();
     this.initialize();
   }
-  public step(_dt: number): void {
-    /* Discrete occupancy model: no time evolution. */
+  /** The occupancy model has no time evolution; only the Patterns autoplay advances with time. */
+  public step(dt: number): void {
+    if (!this.autoplayProperty.value) {
+      return;
+    }
+    this.autoplayElapsed += dt;
+    const z = this.zProperty.value;
+    if (this.autoplayElapsed >= (isFillingException(z) ? AUTOPLAY_EXCEPTION_PAUSE : AUTOPLAY_STEP)) {
+      this.autoplayElapsed = 0;
+      if (z < this.zProperty.range.max) {
+        this.zProperty.value = z + 1;
+      } else {
+        this.autoplayProperty.value = false;
+      }
+    }
   }
   public dispose(): void {
     this.countProperty.dispose();
@@ -210,5 +324,9 @@ export class ConfigurationModel {
     this.ionIndexProperty.dispose();
     this.challengeIndexProperty.dispose();
     this.messageProperty.dispose();
+    this.marksProperty.dispose();
+    this.pauliEmitter.dispose();
+    this.solvedProperty.dispose();
+    this.autoplayProperty.dispose();
   }
 }
