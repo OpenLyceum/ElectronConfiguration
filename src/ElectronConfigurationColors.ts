@@ -120,6 +120,39 @@ const ElectronConfigurationColors = {
     default: "#a9cbff",
     projector: "#a9cbff",
   }),
+
+  // ── Feedback and particles ───────────────────────────────────────────────────
+  // Drawn directly on the screen background, so projector values are darker for contrast on white.
+
+  /** Subshell outline and status icon when a subshell matches the reference. */
+  okColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "ok", {
+    default: "#66d17a",
+    projector: "#2e7d32",
+  }),
+
+  /** Subshell outline, status icon and Pauli flash when something is wrong. */
+  faultColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "fault", {
+    default: "#ff6b6b",
+    projector: "#c62828",
+  }),
+
+  /** Neutral notice (Cr/Cu exception subshells, hovered element's filling subshell). */
+  noteColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "note", {
+    default: "#ffc35c",
+    projector: "#e65100",
+  }),
+
+  /** Proton tally squares on Make an Ion. */
+  protonColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "proton", {
+    default: "#ff8a65",
+    projector: "#d84315",
+  }),
+
+  /** Electron tally squares and shell-view dots. */
+  electronColorProperty: new ProfileColorProperty(ElectronConfigurationNamespace, "electron", {
+    default: "#4fc3f7",
+    projector: "#0277bd",
+  }),
 };
 
 export default ElectronConfigurationColors;

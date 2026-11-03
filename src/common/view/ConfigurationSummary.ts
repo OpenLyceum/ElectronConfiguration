@@ -6,7 +6,7 @@ import type { ConfigurationModel, Message } from "../model/ConfigurationModel.js
 import { configuration, formatCharge, species, subshellCounts } from "../model/Configurations.js";
 
 /** Model messages plus the screen-specific idle prompts that stand in for "ready". */
-type StatusKey = Message | "explore" | "ionReady" | "choose";
+export type StatusKey = Message | "explore" | "ionReady" | "choose";
 export function statusText(model: ConfigurationModel) {
   const strings = StringManager.getInstance().getStrings();
   // "ready" is the idle prompt; its wording depends on what the screen (or current challenge) asks for, so
@@ -21,7 +21,8 @@ export function statusText(model: ConfigurationModel) {
     if (model.kind === "ions") {
       return "ionReady";
     }
-    return model.kind === "detective" && model.challenge?.kind !== "repair" ? "choose" : "ready";
+    const challenge = model.kind === "detective" ? model.challenge?.kind : undefined;
+    return challenge === "identify" || challenge === "isoelectronic" || challenge === "classify" ? "choose" : "ready";
   });
   const pattern = new DynamicProperty(key, {
     derive: (k: typeof key.value) => strings.messages[`${k}StringProperty`],
@@ -31,6 +32,7 @@ export function statusText(model: ConfigurationModel) {
     (p, count, z, q) => StringUtils.fillIn(p, { target: z - q, count }),
   );
   return {
+    key: key as TReadOnlyProperty<StatusKey>,
     property,
     dispose: () => {
       property.dispose();

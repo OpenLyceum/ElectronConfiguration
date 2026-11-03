@@ -10,9 +10,6 @@
     "element": "Numéro atomique Z",
     "selected": "Sélection : {{orbital}}",
     "orbital": "{{subshell}}, orbitale {{index}} : {{state}}",
-    "addUp": "Ajouter ↑",
-    "addDown": "Ajouter ↓",
-    "remove": "Retirer un électron",
     "undo": "Annuler",
     "clear": "Vider le diagramme",
     "nextElectron": "Électron suivant",
@@ -22,19 +19,15 @@
     "full": "Configuration complète",
     "short": "Notation de gaz noble",
     "target": "Cible : {{species}} · {{electrons}} électrons",
-    "placed": "Diagramme : {{count}} électrons",
     "schematic": "Les lignes suivent un guide de remplissage, sans écarts d’énergie mesurés. Les flèches indiquent les projections de spin.",
     "capacity": "s : 1 orbitale / 2 électrons · p : 3 / 6 · d : 5 / 10",
     "rules": "Pauli : au plus deux flèches opposées par orbitale. Hund : occuper séparément les orbitales de même énergie avec des flèches parallèles avant d’apparier. Aufbau est un guide avec des exceptions observées.",
     "core": "Électrons des couches internes : {{core}} · couche externe : {{outer}}",
     "transition": "Dans le bloc d, les électrons d peuvent aussi participer aux liaisons.",
-    "prediction": "Prédiction du guide : {{configuration}}",
     "exception": "La référence observée diffère du guide simple (Cr, Cu). Les interactions électroniques comptent ; le diagramme ne calcule pas les énergies.",
-    "same": "Le guide correspond à cette configuration de référence.",
     "ion": "Choisir un ion",
     "addElectron": "Gagner un électron",
     "loseElectron": "Perdre un électron",
-    "charge": "Protons : {{z}} · électrons : {{electrons}} · charge : {{charge}}",
     "neutral": "Atome neutre",
     "ionRule": "Le noyau reste fixe. Les cations perdent des électrons ; les anions en gagnent. Pour ces cations métalliques, retirer ns avant (n−1)d.",
     "ionScope": "Modèle des configurations d’ions courants ; il ne prédit pas la stabilité d’un ion isolé.",
@@ -42,7 +35,7 @@
     "groundChoice": "Remplissage fondamental",
     "higherChoice": "Permis, mais pas le remplissage fondamental",
     "unknown": "Élément inconnu",
-    "help": "Sélectionnez une orbitale, puis utilisez Ajouter ↑ ou Ajouter ↓. Pauli bloque un spin identique. Électron suivant reconstruit un remplissage guidé avec le nombre actuel.",
+    "help": "Cliquez sur une orbitale pour la faire défiler : vide → ↑ → ↑↓ → vide. Glissez ↑ ou ↓ du plateau vers une orbitale, glissez une flèche vers une autre orbitale, ou hors du diagramme pour la retirer. Clavier : Espace fait défiler, U ajoute ↑, D ajoute ↓, Suppr retire.",
     "mobile": {
       "scroll": "Faire défiler la page",
       "help": "Utilisez la barre, la molette ou balayez hors des commandes. Le focus clavier révèle les commandes.",
@@ -52,7 +45,21 @@
     "targetSpecies": "Cible : {{species}}",
     "sBlock": "bloc s",
     "pBlock": "bloc p",
-    "dBlock": "bloc d"
+    "dBlock": "bloc d",
+    "energyAxis": "Énergie (schématique)",
+    "tray": "Glissez un électron",
+    "surroundings": "Environnement",
+    "info": "À propos de cet écran",
+    "shells": "Afficher les électrons par couche",
+    "shellCaption": "Électrons regroupés par couche n. Une vue de comptage, pas des orbites.",
+    "autoplay": "Parcourir le tableau",
+    "preview": "{{species}} · Z = {{z}} · remplit {{subshell}}",
+    "protons": "Protons",
+    "electrons": "Électrons",
+    "netCharge": "Charge nette {{charge}}",
+    "progress": "{{solved}} résolus sur {{total}}",
+    "observed": "Observé :",
+    "predicted": "Règle de remplissage :"
   },
   "messages": {
     "ready": "Explorez le diagramme ou vérifiez votre prédiction.",
@@ -80,7 +87,8 @@
     "repair": "Corrigez le diagramme pour obtenir le remplissage fondamental.",
     "identify": "Quel élément neutre possède cette configuration ?",
     "isoelectronic": "Quel atome neutre a le même nombre d’électrons que cet ion ?",
-    "classify": "Ce diagramme correspond-il au remplissage fondamental ?"
+    "classify": "Ce diagramme correspond-il au remplissage fondamental ?",
+    "move": "Un électron est dans la mauvaise orbitale. Glissez-le à sa place, puis vérifiez."
   },
   "states": {
     "empty": "vide",
@@ -96,5 +104,12 @@
     "play": "Les cases montrent l’occupation et les projections de spin. La notation suit le diagramme.",
     "controls": "Choisissez un élément ou un ion, sélectionnez les cases et utilisez les boutons nommés. Réinitialiser restaure cet écran.",
     "details": "Cible {{species}}, Z={{z}}, charge={{charge}}. Diagramme : {{count}} électrons. Configuration {{configuration}}. {{status}}"
+  },
+  "keyboard": {
+    "heading": "Diagramme d’orbitales",
+    "cycle": "Faire défiler vide, ↑, ↑↓",
+    "up": "Ajouter un électron de spin haut",
+    "down": "Ajouter un électron de spin bas",
+    "remove": "Retirer un électron"
   }
 }

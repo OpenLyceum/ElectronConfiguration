@@ -10,9 +10,6 @@
     "element": "Atomic number Z",
     "selected": "Selected: {{orbital}}",
     "orbital": "{{subshell}}, orbital {{index}}: {{state}}",
-    "addUp": "Add ↑",
-    "addDown": "Add ↓",
-    "remove": "Remove electron",
     "undo": "Undo",
     "clear": "Clear diagram",
     "nextElectron": "Next electron",
@@ -22,19 +19,15 @@
     "full": "Full configuration",
     "short": "Noble-gas shorthand",
     "target": "Target: {{species}} · {{electrons}} electrons",
-    "placed": "Diagram: {{count}} electrons",
     "schematic": "Rows follow a filling guide, not measured energy spacings. Arrows label spin projections.",
     "capacity": "s: 1 orbital / 2 electrons · p: 3 / 6 · d: 5 / 10",
     "rules": "Pauli: at most two opposite arrows per orbital. Hund: occupy equal-energy orbitals separately with parallel arrows before pairing. Aufbau is a filling guide with observed exceptions.",
     "core": "Inner-shell electrons: {{core}} · outermost-shell electrons: {{outer}}",
     "transition": "For d-block chemistry, the d electrons can also participate in bonding.",
-    "prediction": "Filling-rule prediction: {{configuration}}",
     "exception": "Observed reference differs from the simple filling rule (Cr, Cu). Electron interactions matter; the diagram is not an energy calculation.",
-    "same": "The filling guide matches this reference configuration.",
     "ion": "Choose an ion",
     "addElectron": "Gain one electron",
     "loseElectron": "Lose one electron",
-    "charge": "Protons: {{z}} · electrons: {{electrons}} · charge: {{charge}}",
     "neutral": "Neutral atom",
     "ionRule": "The nucleus stays fixed. Cations lose electrons; anions gain electrons. For these transition-metal cations, remove ns electrons before (n−1)d electrons.",
     "ionScope": "Common-ion configuration model; it does not predict whether an isolated ion is stable.",
@@ -42,7 +35,7 @@
     "groundChoice": "Ground-state filling",
     "higherChoice": "Allowed, but not ground-state filling",
     "unknown": "Unknown element",
-    "help": "Select an orbital, then use Add ↑ or Add ↓. A duplicate spin is blocked by Pauli. Next electron rebuilds a guided arrangement using the current count.",
+    "help": "Click an orbital to cycle it: empty → ↑ → ↑↓ → empty. Drag ↑ or ↓ from the tray onto an orbital, drag an arrow to another orbital, or drag it off the diagram to remove it. Keyboard: Space cycles, U adds ↑, D adds ↓, Delete removes.",
     "mobile": {
       "scroll": "Scroll page",
       "help": "Use the scroll bar, wheel, or swipe outside controls. Keyboard focus brings controls into view.",
@@ -52,7 +45,21 @@
     "targetSpecies": "Target: {{species}}",
     "sBlock": "s block",
     "pBlock": "p block",
-    "dBlock": "d block"
+    "dBlock": "d block",
+    "energyAxis": "Energy (schematic)",
+    "tray": "Drag an electron",
+    "surroundings": "Surroundings",
+    "info": "About this screen",
+    "shells": "Show electrons by shell",
+    "shellCaption": "Electrons grouped by shell n. A counting view, not orbits.",
+    "autoplay": "Step through the table",
+    "preview": "{{species}} · Z = {{z}} · fills {{subshell}}",
+    "protons": "Protons",
+    "electrons": "Electrons",
+    "netCharge": "Net charge {{charge}}",
+    "progress": "Solved {{solved}} of {{total}}",
+    "observed": "Observed:",
+    "predicted": "Filling rule:"
   },
   "messages": {
     "ready": "Explore the diagram or check your prediction.",
@@ -80,7 +87,8 @@
     "repair": "Repair the diagram so it matches ground-state filling.",
     "identify": "Which neutral element has this configuration?",
     "isoelectronic": "Which neutral atom has the same number of electrons as this ion?",
-    "classify": "Does this diagram match ground-state filling?"
+    "classify": "Does this diagram match ground-state filling?",
+    "move": "One electron is in the wrong orbital. Drag it to where it belongs, then Check."
   },
   "states": {
     "empty": "empty",
@@ -96,5 +104,12 @@
     "play": "Orbital boxes show occupancy and spin projections. Configuration notation updates with the diagram.",
     "controls": "Choose an element or ion, select orbital boxes, and use the named action buttons. Reset restores this screen.",
     "details": "Target {{species}}, Z={{z}}, charge={{charge}}. Diagram: {{count}} electrons. Configuration {{configuration}}. {{status}}"
+  },
+  "keyboard": {
+    "heading": "Orbital diagram",
+    "cycle": "Cycle empty, ↑, ↑↓",
+    "up": "Add a spin-up electron",
+    "down": "Add a spin-down electron",
+    "remove": "Remove one electron"
   }
 }
