@@ -1,21 +1,91 @@
 {
-  "title": "Modèle de Simulation",
+  "title": "Configuration électronique",
   "screens": {
-    "sim": "Simulation"
+    "fillOrbitals": "Remplir les orbitales",
+    "periodicPatterns": "Régularités du tableau",
+    "ions": "Former un ion",
+    "configurationDetective": "Détective des configurations"
   },
-  "a11y": {
-    "screenSummary": {
-      "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-      "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-      "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+  "common": {
+    "element": "Numéro atomique Z",
+    "selected": "Sélection : {{orbital}}",
+    "orbital": "{{subshell}}, orbitale {{index}} : {{state}}",
+    "addUp": "Ajouter ↑",
+    "addDown": "Ajouter ↓",
+    "remove": "Retirer un électron",
+    "undo": "Annuler",
+    "clear": "Vider le diagramme",
+    "nextElectron": "Électron suivant",
+    "ground": "Afficher le remplissage fondamental",
+    "check": "Vérifier",
+    "details": "Afficher les nombres quantiques",
+    "full": "Configuration complète",
+    "short": "Notation de gaz noble",
+    "target": "Cible : {{species}} · {{electrons}} électrons",
+    "placed": "Diagramme : {{count}} électrons",
+    "schematic": "Les lignes suivent un guide de remplissage, sans écarts d’énergie mesurés. Les flèches indiquent les projections de spin.",
+    "capacity": "s : 1 orbitale / 2 électrons · p : 3 / 6 · d : 5 / 10",
+    "rules": "Pauli : au plus deux flèches opposées par orbitale. Hund : occuper séparément les orbitales de même énergie avec des flèches parallèles avant d’apparier. Aufbau est un guide avec des exceptions observées.",
+    "core": "Électrons des couches internes : {{core}} · couche externe : {{outer}}",
+    "transition": "Dans le bloc d, les électrons d peuvent aussi participer aux liaisons.",
+    "prediction": "Prédiction du guide : {{configuration}}",
+    "exception": "La référence observée diffère du guide simple (Cr, Cu). Les interactions électroniques comptent ; le diagramme ne calcule pas les énergies.",
+    "same": "Le guide correspond à cette configuration de référence.",
+    "ion": "Choisir un ion",
+    "addElectron": "Gagner un électron",
+    "loseElectron": "Perdre un électron",
+    "charge": "Protons : {{z}} · électrons : {{electrons}} · charge : {{charge}}",
+    "neutral": "Atome neutre",
+    "ionRule": "Le noyau reste fixe. Les cations perdent des électrons ; les anions en gagnent. Pour ces cations métalliques, retirer ns avant (n−1)d.",
+    "ionScope": "Modèle des configurations d’ions courants ; il ne prédit pas la stabilité d’un ion isolé.",
+    "nextChallenge": "Défi suivant",
+    "groundChoice": "Remplissage fondamental",
+    "higherChoice": "Permis, mais pas le remplissage fondamental",
+    "unknown": "Élément inconnu",
+    "help": "Sélectionnez une orbitale, puis utilisez Ajouter ↑ ou Ajouter ↓. Pauli bloque un spin identique. Électron suivant reconstruit un remplissage guidé avec le nombre actuel.",
+    "mobile": {
+      "scroll": "Faire défiler la page",
+      "help": "Utilisez la barre, la molette ou balayez hors des commandes. Le focus clavier révèle les commandes.",
+      "screen": "Écran"
     },
-    "currentDetails": "La simulation est dans son état initial.",
-    "controls": {
-      "exampleControl": "Contrôle d'exemple"
-    }
+    "current": "Actuel : {{species}} · {{electrons}} électrons"
+  },
+  "messages": {
+    "ready": "Explorez le diagramme ou vérifiez votre prédiction.",
+    "pauli": "Pauli : cette projection de spin occupe déjà cette orbitale. Le spin opposé peut la partager.",
+    "count": "La cible demande {{target}} électrons ; le diagramme en a {{count}}.",
+    "higher": "Le nombre est correct. Cette occupation permise ne correspond pas à l’état fondamental de référence. Vérifiez les sous-couches occupées.",
+    "hund": "Les sous-couches ont les bons nombres. Pour le remplissage fondamental, répartissez les flèches parallèles entre orbitales de même énergie avant d’apparier.",
+    "ground": "Correspond au remplissage fondamental. Les orbitales équivalentes et l’inversion des flèches de spin sont acceptées.",
+    "correct": "Correct.",
+    "again": "Réessayez. Comparez les nombres d’électrons ou les règles de remplissage.",
+    "solution": "Référence fondamentale affichée."
+  },
+  "lessons": {
+    "fill": "Construire un diagramme orbital",
+    "patterns": "Lire les régularités du tableau",
+    "ions": "Changer les électrons, garder le noyau",
+    "detective": "Expliquer et corriger les configurations"
+  },
+  "prompts": {
+    "repair": "Corrigez le diagramme pour obtenir le remplissage fondamental.",
+    "identify": "Quel élément neutre possède cette configuration ?",
+    "isoelectronic": "Quel atome neutre a le même nombre d’électrons que cet ion ?",
+    "classify": "Ce diagramme correspond-il au remplissage fondamental ?"
+  },
+  "states": {
+    "empty": "vide",
+    "up": "un électron de spin haut",
+    "down": "un électron de spin bas",
+    "pair": "deux électrons appariés"
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Exemple de bascule"
+    "note": "Utilisez Visuel et Langue pour le mode projecteur et la langue."
+  },
+  "a11y": {
+    "play": "Les cases montrent l’occupation et les projections de spin. La notation suit le diagramme.",
+    "controls": "Choisissez un élément ou un ion, sélectionnez les cases et utilisez les boutons nommés. Réinitialiser restaure cet écran.",
+    "details": "Cible {{species}}, Z={{z}}, charge={{charge}}. Diagramme : {{count}} électrons. Configuration {{configuration}}. {{status}}"
   }
 }

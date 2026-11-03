@@ -1,50 +1,31 @@
-# Model - SceneryStack Template
+# Electron configuration model
 
-This document describes the model (the underlying physics, math, and behavior) for the simulation, in
-terms appropriate for an educator. It is the companion to
-[implementation-notes.md](./implementation-notes.md), which targets developers.
+This simulation supports first-semester general chemistry. It complements QuantumAtom3D's hydrogenic wavefunctions with a symbolic many-electron occupancy model.
 
-> **Replace this entire file when forking.** The template ships with no domain physics — only the
-> section structure below. Real OpenLyceum sims (e.g. Stern Gerlach, Light Propagation) fill each
-> section with equations, ranges, and simplifications verified against their model code.
+## Representation
 
-## Overview
+Each orbital holds two spin-projection bits. The view permits a maximum of one electron of each spin per orbital. Empty, singly occupied and paired orbitals are explicit. Orbitals within a subshell have no preferred spatial orientation. Their displayed m labels are one conventional basis.
 
-*One or two paragraphs describing what the simulation models and the key ideas a student should take
-away. Write for a teacher, not a programmer — avoid code and class names.*
+Rows follow the introductory filling order through 4p, plus 5s for an allowed promoted arrangement. Their vertical positions are not energy measurements. The model computes no energies, shapes, trajectories, spectra, or electron correlations.
 
-**Example (do not ship):** "The simulation models a block sliding on a ramp with adjustable friction
-and angle. Students see how the component of gravity parallel to the surface sets acceleration and
-how static vs kinetic friction limits motion."
+## Neutral atoms
 
-The template's `SimModel` is an empty coordinator — replace it with real state and a `step(dt)` /
-`reset()` that implement your physics.
+The supported range is H–Kr. A capacity-filling prediction is displayed separately from reference configurations. Cr is [Ar] 3d5 4s1 and Cu is [Ar] 3d10 4s1. These are reference overrides, not deductions from a universal half-filled/full-filled stability rule. Configuration notation uses increasing n and l; the diagram follows the filling guide.
 
-## Quantities and units
+The guided Next electron button constructs a reference-filling prefix using the current electron count; it can replace a manual arrangement. It does not simulate a physical addition process or charge-dependent atomic relaxation.
 
-*List the primary modeled quantities, their symbols, units (SI where applicable), and control ranges.
-Mirror the ranges enforced in your `*Constants.ts` or model `Range` options.*
+## Checking
 
-| Quantity | Symbol | Units | Range |
-|---|---|---|---|
-| *(example)* time | t | s | 0 – ∞ |
-| *(example)* mass | m | kg | 0.1 – 5.0 |
+Wrong electron count, nonreference subshell occupation, and a mismatch with the introductory Hund pattern receive separate feedback. A same-spin duplicate in one orbital is blocked by Pauli. Nonreference configurations can still satisfy Pauli; they are not called impossible. Correct reference occupation and maximum parallel unpaired spins pass regardless of degenerate orbital permutation or spin reversal. This is a configuration/Hund exercise, not a complete multiplet or atomic term classification.
 
-## Governing equations
+## Ions
 
-*State the equations or rules that drive the model, with a sentence explaining each. Use a smaller
-fixed time step than the screen default if the integration requires it; the model makes no assumption
-about frame rate.*
+Only the listed common ions and steps between their neutral and target charge are exposed. Electrons are removed by descending n, then l; for the selected transition-metal cations, 4s is removed before 3d. Anions fill available orbitals. Nuclear charge stays fixed. This algorithm must not be generalized to arbitrary ions: ion configurations can require separate experimental references. Chemical ions such as oxide do not imply a stable isolated gas-phase atom with that charge.
 
-**Example (do not ship):** For a damped spring, m·a = −k·x − b·v (+ gravity if applicable).
+## Sources
 
-## Simplifications and assumptions
+- [OpenStax Chemistry 2e, 6.4](https://openstax.org/books/chemistry-2e/pages/6-4-electronic-structure-of-atoms-electron-configurations): Aufbau, Pauli, Hund, periodic patterns, ions, and exceptions.
+- [NIST chromium](https://physics.nist.gov/PhysRefData/Handbook/Tables/chromiumtable1.htm): neutral chromium reference.
+- [NIST copper](https://physics.nist.gov/PhysRefData/Handbook/Tables/coppertable1.htm): neutral copper and Cu+ reference.
 
-*Note anything intentionally idealized or omitted relative to the real-world phenomenon (e.g. no air
-resistance, point masses, instantaneous response), so educators can set expectations.*
-
-**Example (do not ship):** "Massless spring; linear damping only; motion confined to one dimension."
-
-## References
-
-*Optional: textbook sections, papers, or standards the model is based on.*
+Tests contain independent expected notation fixtures for C, N, O, Cr, Cu, Kr and representative main-group and transition-metal ions, plus conservation and interaction regressions.

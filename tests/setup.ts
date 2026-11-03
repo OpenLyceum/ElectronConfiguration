@@ -187,7 +187,7 @@ import { init, madeWithSceneryStackSplashDataURI } from "scenerystack/init";
 
 init({
   // Must match the package.json "name" (and the name in src/init.ts).
-  name: "scenerystack-template",
+  name: "electron-configuration",
   version: "1.0.0-test",
   brand: "made-with-scenerystack",
   locale: "en",
