@@ -1,22 +1,24 @@
 {
-  "name": "scenerystack-template",
+  "name": "electron-configuration",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "GitHub template for OpenLyceum SceneryStack sims (rename + scaffold-screens for one or N screens).",
+  "description": "Build orbital diagrams, discover periodic-table patterns, form common ions, and solve electron-configuration challenges for first-semester general chemistry.",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenLyceum/SceneryStackTemplate.git"
+    "url": "https://github.com/OpenLyceum/ElectronConfiguration.git"
   },
   "keywords": [
-    "template",
     "simulation",
     "SceneryStack",
     "interactive",
     "physics",
     "education",
-    "pwa"
+    "pwa",
+    "chemistry",
+    "electron-configuration",
+    "atomic-structure"
   ],
   "scripts": {
     "start": "vite",
@@ -36,8 +38,6 @@
     "test:fuzz:quick": "node scripts/test-fuzz.ts 10",
     "test:fuzz:long": "node scripts/test-fuzz.ts 300",
     "icons": "node scripts/generate-icons.ts",
-    "rename": "node scripts/rename-sim.ts",
-    "scaffold-screens": "node scripts/scaffold-screens.ts",
     "clean": "rm -rf dist",
     "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true"
   },

@@ -1,21 +1,91 @@
 {
-  "title": "Plantilla de Simulación",
+  "title": "Configuración electrónica",
   "screens": {
-    "sim": "Simulación"
+    "fillOrbitals": "Llenar los orbitales",
+    "periodicPatterns": "Patrones en la tabla",
+    "ions": "Formar un ion",
+    "configurationDetective": "Detective de configuraciones"
   },
-  "a11y": {
-    "screenSummary": {
-      "playArea": "El área de juego muestra el contenido principal de la simulación.",
-      "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-      "interactionHint": "Explora la simulación interactuando con sus controles."
+  "common": {
+    "element": "Número atómico Z",
+    "selected": "Selección: {{orbital}}",
+    "orbital": "{{subshell}}, orbital {{index}}: {{state}}",
+    "addUp": "Añadir ↑",
+    "addDown": "Añadir ↓",
+    "remove": "Quitar electrón",
+    "undo": "Deshacer",
+    "clear": "Vaciar diagrama",
+    "nextElectron": "Siguiente electrón",
+    "ground": "Mostrar llenado fundamental",
+    "check": "Comprobar",
+    "details": "Mostrar números cuánticos",
+    "full": "Configuración completa",
+    "short": "Notación de gas noble",
+    "target": "Objetivo: {{species}} · {{electrons}} electrones",
+    "placed": "Diagrama: {{count}} electrones",
+    "schematic": "Las filas siguen una guía de llenado, sin separaciones de energía medidas. Las flechas indican proyecciones de espín.",
+    "capacity": "s: 1 orbital / 2 electrones · p: 3 / 6 · d: 5 / 10",
+    "rules": "Pauli: como máximo dos flechas opuestas por orbital. Hund: ocupar por separado los orbitales de igual energía con flechas paralelas antes de emparejar. Aufbau es una guía con excepciones observadas.",
+    "core": "Electrones de capas internas: {{core}} · capa más externa: {{outer}}",
+    "transition": "En la química del bloque d, los electrones d también pueden participar en enlaces.",
+    "prediction": "Predicción de la guía: {{configuration}}",
+    "exception": "La referencia observada difiere de la guía simple (Cr, Cu). Importan las interacciones electrónicas; el diagrama no calcula energías.",
+    "same": "La guía coincide con esta configuración de referencia.",
+    "ion": "Elegir un ion",
+    "addElectron": "Ganar un electrón",
+    "loseElectron": "Perder un electrón",
+    "charge": "Protones: {{z}} · electrones: {{electrons}} · carga: {{charge}}",
+    "neutral": "Átomo neutro",
+    "ionRule": "El núcleo permanece fijo. Los cationes pierden electrones; los aniones los ganan. Para estos cationes metálicos, quitar ns antes de (n−1)d.",
+    "ionScope": "Modelo de configuraciones de iones comunes; no predice la estabilidad de un ion aislado.",
+    "nextChallenge": "Siguiente reto",
+    "groundChoice": "Llenado fundamental",
+    "higherChoice": "Permitido, pero no el llenado fundamental",
+    "unknown": "Elemento desconocido",
+    "help": "Selecciona un orbital y usa Añadir ↑ o Añadir ↓. Pauli bloque un espín duplicado. Siguiente electrón reconstruye un llenado guiado con el número actual.",
+    "mobile": {
+      "scroll": "Desplazar la página",
+      "help": "Use la barra, la rueda o deslice fuera de los controles. El foco del teclado muestra los controles.",
+      "screen": "Pantalla"
     },
-    "currentDetails": "La simulación está en su estado inicial.",
-    "controls": {
-      "exampleControl": "Control de ejemplo"
-    }
+    "current": "Actual: {{species}} · {{electrons}} electrones"
+  },
+  "messages": {
+    "ready": "Explore el diagrama o compruebe su predicción.",
+    "pauli": "Pauli: esa proyección de espín ya ocupa este orbital. El espín opuesto puede compartirlo.",
+    "count": "El objetivo requiere {{target}} electrones; el diagrama tiene {{count}}.",
+    "higher": "El número es correcto. Esta ocupación permitida no coincide con la referencia fundamental. Revise las subcapas ocupadas.",
+    "hund": "Las subcapas tienen las cantidades correctas. Para el llenado fundamental, distribuya flechas paralelas en orbitales de igual energía antes de emparejar.",
+    "ground": "Coincide con el llenado fundamental. Se aceptan orbitales equivalentes y flechas de espín invertidas.",
+    "correct": "Correcto.",
+    "again": "Inténtelo de nuevo. Compare las cantidades de electrones o las reglas de llenado.",
+    "solution": "Referencia fundamental mostrada."
+  },
+  "lessons": {
+    "fill": "Construir un diagrama orbital",
+    "patterns": "Leer los patrones de la tabla",
+    "ions": "Cambiar electrones, conservar el núcleo",
+    "detective": "Explicar y reparar configuraciones"
+  },
+  "prompts": {
+    "repair": "Repare el diagrama para obtener el llenado fundamental.",
+    "identify": "¿Qué elemento neutro tiene esta configuración?",
+    "isoelectronic": "¿Qué átomo neutro tiene el mismo número de electrones que este ion?",
+    "classify": "¿Coincide este diagrama con el llenado fundamental?"
+  },
+  "states": {
+    "empty": "vacío",
+    "up": "un electrón de espín arriba",
+    "down": "un electrón de espín abajo",
+    "pair": "dos electrones emparejados"
   },
   "preferences": {
     "title": "Simulación",
-    "exampleToggle": "Ejemplo de alternancia"
+    "note": "Use Visual e Idioma para el modo proyector y el idioma."
+  },
+  "a11y": {
+    "play": "Las casillas muestran ocupación y proyecciones de espín. La notación sigue al diagrama.",
+    "controls": "Elija un elemento o ion, seleccione casillas y use los botones con nombre. Reiniciar restaura esta pantalla.",
+    "details": "Objetivo {{species}}, Z={{z}}, carga={{charge}}. Diagrama: {{count}} electrones. Configuración {{configuration}}. {{status}}"
   }
 }

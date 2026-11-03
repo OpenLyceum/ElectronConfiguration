@@ -1,21 +1,91 @@
 {
-  "title": "SceneryStack Template",
+  "title": "Electron Configuration",
   "screens": {
-    "sim": "Sim"
+    "fillOrbitals": "Fill the Orbitals",
+    "periodicPatterns": "Patterns in the Table",
+    "ions": "Make an Ion",
+    "configurationDetective": "Configuration Detective"
   },
-  "a11y": {
-    "screenSummary": {
-      "playArea": "The play area shows the main simulation content.",
-      "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-      "interactionHint": "Explore the simulation by interacting with its controls."
+  "common": {
+    "element": "Atomic number Z",
+    "selected": "Selected: {{orbital}}",
+    "orbital": "{{subshell}}, orbital {{index}}: {{state}}",
+    "addUp": "Add ↑",
+    "addDown": "Add ↓",
+    "remove": "Remove electron",
+    "undo": "Undo",
+    "clear": "Clear diagram",
+    "nextElectron": "Next electron",
+    "ground": "Show ground-state filling",
+    "check": "Check",
+    "details": "Show quantum numbers",
+    "full": "Full configuration",
+    "short": "Noble-gas shorthand",
+    "target": "Target: {{species}} · {{electrons}} electrons",
+    "placed": "Diagram: {{count}} electrons",
+    "schematic": "Rows follow a filling guide, not measured energy spacings. Arrows label spin projections.",
+    "capacity": "s: 1 orbital / 2 electrons · p: 3 / 6 · d: 5 / 10",
+    "rules": "Pauli: at most two opposite arrows per orbital. Hund: occupy equal-energy orbitals separately with parallel arrows before pairing. Aufbau is a filling guide with observed exceptions.",
+    "core": "Inner-shell electrons: {{core}} · outermost-shell electrons: {{outer}}",
+    "transition": "For d-block chemistry, the d electrons can also participate in bonding.",
+    "prediction": "Filling-rule prediction: {{configuration}}",
+    "exception": "Observed reference differs from the simple filling rule (Cr, Cu). Electron interactions matter; the diagram is not an energy calculation.",
+    "same": "The filling guide matches this reference configuration.",
+    "ion": "Choose an ion",
+    "addElectron": "Gain one electron",
+    "loseElectron": "Lose one electron",
+    "charge": "Protons: {{z}} · electrons: {{electrons}} · charge: {{charge}}",
+    "neutral": "Neutral atom",
+    "ionRule": "The nucleus stays fixed. Cations lose electrons; anions gain electrons. For these transition-metal cations, remove ns electrons before (n−1)d electrons.",
+    "ionScope": "Common-ion configuration model; it does not predict whether an isolated ion is stable.",
+    "nextChallenge": "Next challenge",
+    "groundChoice": "Ground-state filling",
+    "higherChoice": "Allowed, but not ground-state filling",
+    "unknown": "Unknown element",
+    "help": "Select an orbital, then use Add ↑ or Add ↓. A duplicate spin is blocked by Pauli. Next electron rebuilds a guided arrangement using the current count.",
+    "mobile": {
+      "scroll": "Scroll page",
+      "help": "Use the scroll bar, wheel, or swipe outside controls. Keyboard focus brings controls into view.",
+      "screen": "Screen"
     },
-    "currentDetails": "The simulation is in its initial state.",
-    "controls": {
-      "exampleControl": "Example control"
-    }
+    "current": "Current: {{species}} · {{electrons}} electrons"
+  },
+  "messages": {
+    "ready": "Explore the diagram or check your prediction.",
+    "pauli": "Pauli: that spin projection is already occupied in this orbital. The opposite spin may share it.",
+    "count": "The target needs {{target}} electrons; the diagram has {{count}}.",
+    "higher": "The electron count is right. This allowed occupancy does not match the ground-state reference. Check which subshells are occupied.",
+    "hund": "The subshell counts are right. For ground-state filling, spread parallel arrows among equal-energy orbitals before pairing.",
+    "ground": "Matches ground-state filling. Equivalent orbital choices and reversed spin arrows are accepted.",
+    "correct": "Correct.",
+    "again": "Try again. Compare the electron counts or the filling rules.",
+    "solution": "Ground-state reference shown."
+  },
+  "lessons": {
+    "fill": "Build an orbital diagram",
+    "patterns": "Read the periodic pattern",
+    "ions": "Change electrons, keep the nucleus",
+    "detective": "Explain and repair configurations"
+  },
+  "prompts": {
+    "repair": "Repair the diagram so it matches ground-state filling.",
+    "identify": "Which neutral element has this configuration?",
+    "isoelectronic": "Which neutral atom has the same number of electrons as this ion?",
+    "classify": "Does this diagram match ground-state filling?"
+  },
+  "states": {
+    "empty": "empty",
+    "up": "one up-spin electron",
+    "down": "one down-spin electron",
+    "pair": "two paired electrons"
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Example Toggle"
+    "note": "Use Visual and Localization for projector mode and language."
+  },
+  "a11y": {
+    "play": "Orbital boxes show occupancy and spin projections. Configuration notation updates with the diagram.",
+    "controls": "Choose an element or ion, select orbital boxes, and use the named action buttons. Reset restores this screen.",
+    "details": "Target {{species}}, Z={{z}}, charge={{charge}}. Diagram: {{count}} electrons. Configuration {{configuration}}. {{status}}"
   }
 }
