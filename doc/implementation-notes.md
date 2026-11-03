@@ -12,7 +12,7 @@ No general many-electron numerical solver or arbitrary ion configuration engine 
 ## State changes
 
 Every action replaces the orbital array. Undo stores earlier arrays without mutating them.
-Changing a neutral element clears manual work on Fill the Orbitals and loads the reference on Patterns in the Table.
+Changing the target element keeps manual work (and undo history) on Fill the Orbitals, so students can step Z up and add one electron; Patterns in the Table loads the reference. Edits that change nothing (Remove on an empty orbital, Clear on an empty diagram) do not add undo steps.
 Ion targets have fixed endpoints; gain/loss buttons cannot move outside the selected neutral-to-ion interval.
 Challenge changes restore the specified starting diagram and clear prior feedback and undo history.
 The chemistry model is independent of Scenery nodes so reference fixtures run without a rendering engine.

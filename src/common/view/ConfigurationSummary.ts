@@ -2,12 +2,29 @@ import { DerivedProperty, DynamicProperty, type TReadOnlyProperty } from "scener
 import { StringUtils } from "scenerystack/phetcommon";
 import { ScreenSummaryContent } from "scenerystack/sim";
 import { StringManager } from "../../i18n/StringManager.js";
-import type { ConfigurationModel } from "../model/ConfigurationModel.js";
-import { configuration, species, subshellCounts } from "../model/Configurations.js";
+import type { ConfigurationModel, Message } from "../model/ConfigurationModel.js";
+import { configuration, formatCharge, species, subshellCounts } from "../model/Configurations.js";
+
+/** Model messages plus the screen-specific idle prompts that stand in for "ready". */
+type StatusKey = Message | "explore" | "ionReady" | "choose";
 export function statusText(model: ConfigurationModel) {
   const strings = StringManager.getInstance().getStrings();
-  const pattern = new DynamicProperty(model.messageProperty, {
-    derive: (key: typeof model.messageProperty.value) => strings.messages[`${key}StringProperty`],
+  // "ready" is the idle prompt; its wording depends on what the screen (or current challenge) asks for, so
+  // screens without a Check button never invite the student to "check your prediction".
+  const key = new DerivedProperty([model.messageProperty, model.challengeIndexProperty], (message): StatusKey => {
+    if (message !== "ready") {
+      return message;
+    }
+    if (model.kind === "patterns") {
+      return "explore";
+    }
+    if (model.kind === "ions") {
+      return "ionReady";
+    }
+    return model.kind === "detective" && model.challenge?.kind !== "repair" ? "choose" : "ready";
+  });
+  const pattern = new DynamicProperty(key, {
+    derive: (k: typeof key.value) => strings.messages[`${k}StringProperty`],
   });
   const property = new DerivedProperty(
     [pattern, model.countProperty, model.zProperty, model.chargeProperty],
@@ -18,6 +35,7 @@ export function statusText(model: ConfigurationModel) {
     dispose: () => {
       property.dispose();
       pattern.dispose();
+      key.dispose();
     },
   };
 }
@@ -43,7 +61,7 @@ export class ConfigurationSummary extends ScreenSummaryContent {
         return StringUtils.fillIn(pattern, {
           species: hidden ? unknown : species(z, q),
           z: hidden ? "?" : z,
-          charge: q,
+          charge: formatCharge(q),
           count,
           configuration: configuration(subshellCounts(diagram)),
           status: feedback,

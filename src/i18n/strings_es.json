@@ -48,7 +48,11 @@
       "help": "Use la barra, la rueda o deslice fuera de los controles. El foco del teclado muestra los controles.",
       "screen": "Pantalla"
     },
-    "current": "Actual: {{species}} · {{electrons}} electrones"
+    "current": "Actual: {{species}} · {{electrons}} electrones",
+    "targetSpecies": "Objetivo: {{species}}",
+    "sBlock": "bloque s",
+    "pBlock": "bloque p",
+    "dBlock": "bloque d"
   },
   "messages": {
     "ready": "Explore el diagrama o compruebe su predicción.",
@@ -59,7 +63,12 @@
     "ground": "Coincide con el llenado fundamental. Se aceptan orbitales equivalentes y flechas de espín invertidas.",
     "correct": "Correcto.",
     "again": "Inténtelo de nuevo. Compare las cantidades de electrones o las reglas de llenado.",
-    "solution": "Referencia fundamental mostrada."
+    "solution": "Referencia fundamental mostrada.",
+    "explore": "Elija un elemento para comparar su configuración de referencia con la predicción de la regla de llenado.",
+    "ionReady": "Gane o pierda electrones de uno en uno hasta que el diagrama muestre el ion objetivo.",
+    "choose": "Elija una respuesta.",
+    "limit": "Ese paso iría más allá del ion objetivo o del átomo neutro. Pruebe el otro botón.",
+    "anomaly": "Último electrón colocado. El estado fundamental observado reorganiza los electrones 4s y 3d respecto a la regla de llenado simple."
   },
   "lessons": {
     "fill": "Construir un diagrama orbital",

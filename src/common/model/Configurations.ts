@@ -32,13 +32,15 @@ export function fillingPrediction(electrons: number): number[] {
   }
   return result;
 }
+/** Neutral atoms whose observed ground state differs from the simple filling rule (within H–Kr). */
+export const isFillingException = (z: number): boolean => z === 24 || z === 29;
 export function referenceCounts(z: number, charge = 0): number[] {
   if (!Number.isInteger(z) || z < 1 || z > 36 || !Number.isInteger(charge) || z - charge < 0 || z - charge > 38) {
     throw new Error("Unsupported atomic number or electron count");
   }
   const result = fillingPrediction(z);
   // Neutral reference exceptions, checked against NIST atomic data; not inferred from a half-filled slogan.
-  if (z === 24 || z === 29) {
+  if (isFillingException(z)) {
     result[5] = (result[5] ?? 0) - 1;
     result[6] = (result[6] ?? 0) + 1;
   }
@@ -84,6 +86,17 @@ export function diagramForCounts(counts: readonly number[], limit = Infinity): n
   return result;
 }
 export const referenceDiagram = (z: number, charge = 0): number[] => diagramForCounts(referenceCounts(z, charge));
+/**
+ * One step of guided (aufbau) construction toward neutral element z: intermediate electron counts follow
+ * the simple filling rule, and the final step shows the observed reference (so Cr and Cu rearrange last).
+ */
+export function guidedDiagram(z: number, electrons: number): number[] {
+  const count = Math.max(0, Math.min(electrons, z));
+  return count >= z ? referenceDiagram(z) : diagramForCounts(fillingPrediction(count));
+}
+const S_BLOCK = new Set([1, 2, 3, 4, 11, 12, 19, 20]);
+/** Periodic-table block (s, p or d) of element z within H–Kr; He is placed in the s block. */
+export const block = (z: number): "s" | "p" | "d" => (S_BLOCK.has(z) ? "s" : z >= 21 && z <= 30 ? "d" : "p");
 export function followsHund(diagram: Diagram): boolean {
   return SUBSHELLS.every((s, index) => {
     const bits = diagram.filter((_, i) => ORBITALS[i]?.subshell === index);
@@ -109,12 +122,19 @@ export function assess(diagram: Diagram, z: number, charge = 0): Assessment {
   return followsHund(diagram) ? "ground" : "hund";
 }
 const SUPER = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+const toSuperscript = (digits: string): string =>
+  digits
+    .split("")
+    .map((d) => SUPER[Number(d)])
+    .join("");
 export function configuration(counts: readonly number[], abbreviated = false): string {
   let core = 0;
   if (abbreviated) {
+    const total = counts.reduce((sum, n) => sum + n, 0);
+    // The core must be strictly smaller than the species, so Ne reads [He] 2s² 2p⁶ rather than a circular [Ne].
     for (const candidate of [2, 10, 18, 36]) {
       const c = referenceCounts(candidate);
-      if (c.every((n, i) => n <= (counts[i] ?? 0))) {
+      if (candidate < total && c.every((n, i) => n <= (counts[i] ?? 0))) {
         core = candidate;
       }
     }
@@ -125,14 +145,7 @@ export function configuration(counts: readonly number[], abbreviated = false): s
   );
   const parts = indices.flatMap((i) => {
     const count = (counts[i] ?? 0) - (baseline[i] ?? 0);
-    return count > 0
-      ? [
-          `${SUBSHELLS[i]?.name}${String(count)
-            .split("")
-            .map((d) => SUPER[Number(d)])
-            .join("")}`,
-        ]
-      : [];
+    return count > 0 ? [`${SUBSHELLS[i]?.name}${toSuperscript(String(count))}`] : [];
   });
   return [core > 0 ? `[${SYMBOLS[core - 1]}]` : "", ...parts].filter(Boolean).join(" ") || "—";
 }
@@ -153,9 +166,13 @@ export const IONS = [
   { z: 29, q: 2 },
   { z: 30, q: 2 },
 ] as const;
+/** Chemical notation with a superscript charge, e.g. Na⁺, Fe³⁺, O²⁻. */
 export function species(z: number, q = 0): string {
-  return `${SYMBOLS[z - 1] ?? "?"}${q === 0 ? "" : `${Math.abs(q) === 1 ? "" : Math.abs(q)}${q > 0 ? "+" : "−"}`}`;
+  const magnitude = Math.abs(q) === 1 ? "" : toSuperscript(String(Math.abs(q)));
+  return `${SYMBOLS[z - 1] ?? "?"}${q === 0 ? "" : `${magnitude}${q > 0 ? "⁺" : "⁻"}`}`;
 }
+/** Signed charge with a true minus sign: 0, +2, −1. */
+export const formatCharge = (q: number): string => (q > 0 ? `+${q}` : q < 0 ? `−${-q}` : "0");
 export type Challenge = {
   kind: "repair" | "identify" | "isoelectronic" | "classify";
   z: number;

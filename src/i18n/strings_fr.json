@@ -48,7 +48,11 @@
       "help": "Utilisez la barre, la molette ou balayez hors des commandes. Le focus clavier révèle les commandes.",
       "screen": "Écran"
     },
-    "current": "Actuel : {{species}} · {{electrons}} électrons"
+    "current": "Actuel : {{species}} · {{electrons}} électrons",
+    "targetSpecies": "Cible : {{species}}",
+    "sBlock": "bloc s",
+    "pBlock": "bloc p",
+    "dBlock": "bloc d"
   },
   "messages": {
     "ready": "Explorez le diagramme ou vérifiez votre prédiction.",
@@ -59,7 +63,12 @@
     "ground": "Correspond au remplissage fondamental. Les orbitales équivalentes et l’inversion des flèches de spin sont acceptées.",
     "correct": "Correct.",
     "again": "Réessayez. Comparez les nombres d’électrons ou les règles de remplissage.",
-    "solution": "Référence fondamentale affichée."
+    "solution": "Référence fondamentale affichée.",
+    "explore": "Choisissez un élément pour comparer sa configuration de référence à la prédiction de la règle de remplissage.",
+    "ionReady": "Gagnez ou perdez des électrons un à un jusqu’à ce que le diagramme montre l’ion cible.",
+    "choose": "Choisissez une réponse.",
+    "limit": "Cette étape dépasserait l’ion cible ou l’atome neutre. Essayez l’autre bouton.",
+    "anomaly": "Dernier électron placé. L’état fondamental observé réarrange les électrons 4s et 3d par rapport à la règle de remplissage simple."
   },
   "lessons": {
     "fill": "Construire un diagramme orbital",

@@ -1,6 +1,6 @@
 import { DerivedProperty, type NumberProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { StringUtils } from "scenerystack/phetcommon";
-import { HBox, Node, RichText, Text, VBox } from "scenerystack/scenery";
+import { HBox, Node, Rectangle, RichText, Text, VBox } from "scenerystack/scenery";
 import { PhetFont, ResetAllButton } from "scenerystack/scenery-phet";
 import type { ScreenViewOptions } from "scenerystack/sim";
 import { Checkbox, NumberSpinner, RectangularPushButton } from "scenerystack/sun";
@@ -12,9 +12,12 @@ import {
 } from "../ElectronConfigurationButtonOptions.js";
 import type { ConfigurationModel } from "../model/ConfigurationModel.js";
 import {
+  block,
   configuration,
   fillingPrediction,
+  formatCharge,
   IONS,
+  isFillingException,
   ORBITALS,
   referenceCounts,
   referenceDiagram,
@@ -51,11 +54,21 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         accessibleName: label,
         listener: action,
       });
-    const spinner = (property: NumberProperty, name: TReadOnlyProperty<string>) =>
+    const spinner = (
+      property: NumberProperty,
+      name: TReadOnlyProperty<string>,
+      format: ((value: number) => string) | null = null,
+    ) =>
       new NumberSpinner(property, property.rangeProperty, {
         arrowsPosition: "leftRight",
         arrowButtonOptions: FLAT_RECTANGULAR_BUTTON_OPTIONS,
-        numberDisplayOptions: { textOptions: { font: new PhetFont(15) }, minBackgroundWidth: 35 },
+        numberDisplayOptions: {
+          textOptions: { font: new PhetFont(15) },
+          minBackgroundWidth: format ? 55 : 35,
+          numberFormatter: format,
+        },
+        // Screen readers announce the formatted value (e.g. "Fe³⁺"), not an internal index.
+        ...(format ? { pdomCreateAriaValueText: (value: number) => format(value) } : {}),
         accessibleName: name,
       });
     const title = text(strings.lessons[`${model.kind}StringProperty`], 350, 20);
@@ -71,11 +84,18 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         model.challengeIndexProperty,
         model.kind === "ions" ? s.currentStringProperty : s.targetStringProperty,
         s.unknownStringProperty,
+        s.targetSpeciesStringProperty,
       ],
-      (z, q, _c, p, unknown) =>
-        model.kind === "detective" && model.challenge?.kind === "identify"
+      (z, q, _c, p, unknown) => {
+        const kind = model.kind === "detective" ? model.challenge?.kind : undefined;
+        // Identify hides the element; isoelectronic hides the electron count, which is the answer.
+        return kind === "identify"
           ? unknown
-          : StringUtils.fillIn(p, { species: species(z, q), electrons: z - q }),
+          : StringUtils.fillIn(kind === "isoelectronic" ? s.targetSpeciesStringProperty.value : p, {
+              species: species(z, q),
+              electrons: z - q,
+            });
+      },
     );
     const selected = new DerivedProperty(
       [model.selectedProperty, model.detailsProperty, s.selectedStringProperty],
@@ -184,6 +204,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         return [z - 19, 3];
       });
       const table = new Node();
+      const blockColors = {
+        s: Colors.sBlockColorProperty,
+        p: Colors.pBlockColorProperty,
+        d: Colors.dBlockColorProperty,
+      };
       SYMBOLS.forEach((symbol, i) => {
         const position = positions[i];
         if (!position) {
@@ -191,6 +216,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         }
         const pick = new RectangularPushButton({
           ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
+          baseColor: blockColors[block(i + 1)],
           content: new Text(symbol, { font: new PhetFont(11), fill: Colors.controlSurfaceTextColorProperty }),
           minWidth: 23,
           minHeight: 28,
@@ -203,15 +229,41 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         });
         pick.left = (position[0] ?? 0) * 26;
         pick.top = (position[1] ?? 0) * 32;
+        // Outline the element currently shown in the diagram.
+        const outline = new Rectangle(pick.bounds.dilated(2), {
+          stroke: Colors.accentColorProperty,
+          lineWidth: 2,
+          pickable: false,
+          visibleProperty: new DerivedProperty([model.zProperty], (z) => z === i + 1),
+        });
         table.addChild(pick);
+        table.addChild(outline);
+      });
+      const legend = new HBox({
+        spacing: 14,
+        children: (["s", "p", "d"] as const).map(
+          (b) =>
+            new HBox({
+              spacing: 5,
+              children: [
+                new Rectangle(0, 0, 14, 14, {
+                  fill: blockColors[b],
+                  stroke: Colors.controlSurfaceTextColorProperty,
+                }),
+                text(s[`${b}BlockStringProperty`], 100, 12),
+              ],
+            }),
+        ),
       });
       const predicted = new DerivedProperty([model.zProperty, s.predictionStringProperty], (z, p) =>
         StringUtils.fillIn(p, { configuration: configuration(fillingPrediction(z), true) }),
       );
       const note = new DerivedProperty(
         [model.zProperty, s.exceptionStringProperty, s.sameStringProperty],
-        (z, exception, same) => (z === 24 || z === 29 ? exception : same),
+        (z, exception, same) => (isFillingException(z) ? exception : same),
       );
+      const transition = text(s.transitionStringProperty, 350, 12);
+      transition.visibleProperty = new DerivedProperty([model.zProperty], (z) => block(z) === "d");
       const core = new DerivedProperty([model.zProperty, s.coreStringProperty], (z, p) => {
         const counts = referenceCounts(z);
         let n = 0;
@@ -224,27 +276,29 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         return StringUtils.fillIn(p, { core: z - outer, outer });
       });
       specific.children = [
-        table,
+        new VBox({ align: "left", spacing: 6, children: [table, legend] }),
         text(core),
-        text(s.transitionStringProperty, 350, 12),
+        transition,
         text(predicted, 350, 13),
         text(note, 350, 13),
       ];
     }
     if (model.kind === "ions") {
-      const targetIon = new DerivedProperty([model.ionIndexProperty, s.ionStringProperty], (i, label) => {
+      const ionName = (i: number) => {
         const ion = IONS[i];
-        return `${label}: ${ion ? species(ion.z, ion.q) : ""}`;
-      });
+        return ion ? species(ion.z, ion.q) : "";
+      };
       const charge = new DerivedProperty([model.zProperty, model.chargeProperty, s.chargeStringProperty], (z, q, p) =>
-        StringUtils.fillIn(p, { z, electrons: z - q, charge: q > 0 ? `+${q}` : q }),
+        StringUtils.fillIn(p, { z, electrons: z - q, charge: formatCharge(q) }),
       );
       const controls = new VBox({
         spacing: 8,
         align: "left",
         children: [
-          text(targetIon),
-          spinner(model.ionIndexProperty, s.ionStringProperty),
+          new HBox({
+            spacing: 12,
+            children: [text(s.ionStringProperty, 170), spinner(model.ionIndexProperty, s.ionStringProperty, ionName)],
+          }),
           new HBox({
             spacing: 8,
             children: [

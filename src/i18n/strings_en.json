@@ -48,7 +48,11 @@
       "help": "Use the scroll bar, wheel, or swipe outside controls. Keyboard focus brings controls into view.",
       "screen": "Screen"
     },
-    "current": "Current: {{species}} · {{electrons}} electrons"
+    "current": "Current: {{species}} · {{electrons}} electrons",
+    "targetSpecies": "Target: {{species}}",
+    "sBlock": "s block",
+    "pBlock": "p block",
+    "dBlock": "d block"
   },
   "messages": {
     "ready": "Explore the diagram or check your prediction.",
@@ -59,7 +63,12 @@
     "ground": "Matches ground-state filling. Equivalent orbital choices and reversed spin arrows are accepted.",
     "correct": "Correct.",
     "again": "Try again. Compare the electron counts or the filling rules.",
-    "solution": "Ground-state reference shown."
+    "solution": "Ground-state reference shown.",
+    "explore": "Choose an element to compare its reference configuration with the filling-rule prediction.",
+    "ionReady": "Gain or lose electrons one at a time until the diagram shows the target ion.",
+    "choose": "Choose an answer.",
+    "limit": "That step would go past the target ion or the neutral atom. Try the other button.",
+    "anomaly": "Last electron placed. The observed ground state rearranges the 4s and 3d electrons relative to the simple filling rule."
   },
   "lessons": {
     "fill": "Build an orbital diagram",

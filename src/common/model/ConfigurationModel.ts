@@ -9,12 +9,28 @@ import {
   electronCount,
   emptyDiagram,
   fillingPrediction,
+  guidedDiagram,
   IONS,
+  isFillingException,
   ORBITALS,
-  referenceCounts,
   referenceDiagram,
 } from "./Configurations.js";
 export type ScreenKind = "fill" | "patterns" | "ions" | "detective";
+export const MESSAGES = [
+  "ready",
+  "pauli",
+  "count",
+  "higher",
+  "hund",
+  "ground",
+  "correct",
+  "again",
+  "solution",
+  "limit",
+  "anomaly",
+] as const;
+export type Message = (typeof MESSAGES)[number];
+const sameDiagram = (a: Diagram, b: Diagram): boolean => a.length === b.length && a.every((bits, i) => bits === b[i]);
 export class ConfigurationModel {
   public readonly kind: ScreenKind;
   public readonly zProperty = new NumberProperty(query.z, { range: new Range(1, 36), numberType: "Integer" });
@@ -33,18 +49,20 @@ export class ConfigurationModel {
     range: new Range(0, CHALLENGES.length - 1),
     numberType: "Integer",
   });
-  public readonly messageProperty = new StringUnionProperty<
-    "ready" | "pauli" | "count" | "higher" | "hund" | "ground" | "correct" | "again" | "solution"
-  >("ready", { validValues: ["ready", "pauli", "count", "higher", "hund", "ground", "correct", "again", "solution"] });
+  public readonly messageProperty = new StringUnionProperty<Message>("ready", { validValues: MESSAGES });
   public readonly countProperty = new DerivedProperty([this.diagramProperty], electronCount);
   private history: Diagram[] = [];
   public constructor(kind: ScreenKind) {
     this.kind = kind;
     this.zProperty.lazyLink(() => {
-      if (kind === "fill" || kind === "patterns") {
+      if (kind === "patterns") {
         this.chargeProperty.value = 0;
         this.clearHistory();
-        this.diagramProperty.value = kind === "fill" ? emptyDiagram() : referenceDiagram(this.zProperty.value);
+        this.diagramProperty.value = referenceDiagram(this.zProperty.value);
+      } else if (kind === "fill") {
+        // Changing the target keeps the student's diagram (and undo history), so they can build C, then step
+        // Z up to N and add one more electron — walking the table one element at a time.
+        this.messageProperty.value = "ready";
       }
     });
     this.ionIndexProperty.lazyLink(() => {
@@ -121,14 +139,22 @@ export class ConfigurationModel {
   public remove(): void {
     const index = this.selectedProperty.value,
       bits = this.diagramProperty.value[index] ?? 0;
-    this.change(index, bits === 3 ? 1 : 0);
+    if (bits !== 0) {
+      this.change(index, bits === 3 ? 1 : 0);
+    }
   }
   private change(index: number, bits: number): void {
-    this.history.push(this.diagramProperty.value);
     const next = this.diagramProperty.value.slice();
     next[index] = bits;
-    this.diagramProperty.value = next;
-    this.messageProperty.value = "ready";
+    this.commit(next);
+  }
+  /** Records an undoable edit; a no-op edit leaves the undo history untouched. */
+  private commit(next: Diagram, message: Message = "ready"): void {
+    if (!sameDiagram(next, this.diagramProperty.value)) {
+      this.history.push(this.diagramProperty.value);
+      this.diagramProperty.value = next;
+    }
+    this.messageProperty.value = message;
   }
   public undo(): void {
     const previous = this.history.pop();
@@ -138,22 +164,19 @@ export class ConfigurationModel {
     }
   }
   public clear(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = emptyDiagram();
-    this.messageProperty.value = "ready";
+    this.commit(emptyDiagram());
   }
+  /**
+   * Guided aufbau step: rebuilds the diagram with one more electron by the simple filling rule. The final
+   * step shows the observed reference, so for Cr and Cu the 4s/3d rearrangement appears on the last press.
+   */
   public nextElectron(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = diagramForCounts(
-      referenceCounts(this.zProperty.value),
-      Math.min(this.countProperty.value + 1, this.zProperty.value),
-    );
-    this.messageProperty.value = "ready";
+    const z = this.zProperty.value,
+      count = Math.min(this.countProperty.value + 1, z);
+    this.commit(guidedDiagram(z, count), count === z && isFillingException(z) ? "anomaly" : "ready");
   }
   public showGround(): void {
-    this.history.push(this.diagramProperty.value);
-    this.diagramProperty.value = referenceDiagram(this.zProperty.value, this.chargeProperty.value);
-    this.messageProperty.value = "solution";
+    this.commit(referenceDiagram(this.zProperty.value, this.chargeProperty.value), "solution");
   }
   public check(): void {
     this.messageProperty.value = assess(this.diagramProperty.value, this.zProperty.value, this.chargeProperty.value);
@@ -165,6 +188,7 @@ export class ConfigurationModel {
     }
     const next = this.chargeProperty.value + direction;
     if (next < Math.min(0, ion.q) || next > Math.max(0, ion.q)) {
+      this.messageProperty.value = "limit";
       return;
     }
     this.chargeProperty.value = next;
