@@ -24,7 +24,7 @@
     "rules": "Pauli: como máximo dos flechas opuestas por orbital. Hund: ocupar por separado los orbitales de igual energía con flechas paralelas antes de emparejar. Aufbau es una guía con excepciones observadas.",
     "core": "Electrones de capas internas: {{core}} · capa más externa: {{outer}}",
     "transition": "En la química del bloque d, los electrones d también pueden participar en enlaces.",
-    "exception": "La referencia observada difiere de la guía simple (Cr, Cu). Importan las interacciones electrónicas; el diagrama no calcula energías.",
+    "exception": "El estado fundamental observado difiere de la regla de llenado simple (excepciones como Cr, Cu, Pd, Gd, Pt y Au). Las interacciones entre electrones importan; el diagrama no es un cálculo de energía.",
     "ion": "Elegir un ion",
     "addElectron": "Ganar un electrón",
     "loseElectron": "Perder un electrón",
@@ -59,7 +59,8 @@
     "netCharge": "Carga neta {{charge}}",
     "progress": "Resueltos {{solved}} de {{total}}",
     "observed": "Observado:",
-    "predicted": "Regla de llenado:"
+    "predicted": "Regla de llenado:",
+    "fBlock": "bloque f"
   },
   "messages": {
     "ready": "Explore el diagrama o compruebe su predicción.",
@@ -75,7 +76,7 @@
     "ionReady": "Gane o pierda electrones de uno en uno hasta que el diagrama muestre el ion objetivo.",
     "choose": "Elija una respuesta.",
     "limit": "Ese paso iría más allá del ion objetivo o del átomo neutro. Pruebe el otro botón.",
-    "anomaly": "Último electrón colocado. El estado fundamental observado reorganiza los electrones 4s y 3d respecto a la regla de llenado simple."
+    "anomaly": "Último electrón colocado. El estado fundamental observado reorganiza los electrones respecto a la regla de llenado simple."
   },
   "lessons": {
     "fill": "Construir un diagrama orbital",
@@ -98,7 +99,11 @@
   },
   "preferences": {
     "title": "Simulación",
-    "note": "Use Visual e Idioma para el modo proyector y el idioma."
+    "note": "Use Visual e Idioma para el modo proyector y el idioma.",
+    "tableExtent": "Tabla periódica mostrada",
+    "throughKrypton": "Hasta el kriptón (Z = 1–36)",
+    "throughXenon": "Hasta el xenón (Z = 1–54)",
+    "throughRadon": "Hasta el radón (Z = 1–86, con los lantánidos)"
   },
   "a11y": {
     "play": "Las casillas muestran ocupación y proyecciones de espín. La notación sigue al diagrama.",

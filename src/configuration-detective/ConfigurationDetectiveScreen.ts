@@ -9,11 +9,13 @@
  * icons come from createConfigurationDetectiveIcon() in src/common/ElectronConfigurationScreenIcons.ts
  * (see doc/implementation-notes.md).
  */
+import type { TReadOnlyProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
 import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createConfigurationDetectiveIcon } from "../common/ElectronConfigurationScreenIcons.js";
+import type { TableExtent } from "../common/model/TableExtent.js";
 import ElectronConfigurationColors from "../ElectronConfigurationColors.js";
 import { ConfigurationDetectiveModel } from "./model/ConfigurationDetectiveModel.js";
 import { ConfigurationDetectiveKeyboardHelpContent } from "./view/ConfigurationDetectiveKeyboardHelpContent.js";
@@ -21,15 +23,17 @@ import { ConfigurationDetectiveScreenView } from "./view/ConfigurationDetectiveS
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
 type ConfigurationDetectiveScreenOptions = ScreenOptions & { tandem: Tandem };
+/** Shared preference: how much of the periodic table the sim offers. */
+type ExtentProperty = TReadOnlyProperty<TableExtent>;
 
 export class ConfigurationDetectiveScreen extends Screen<
   ConfigurationDetectiveModel,
   ConfigurationDetectiveScreenView
 > {
-  public constructor(options: ConfigurationDetectiveScreenOptions) {
+  public constructor(options: ConfigurationDetectiveScreenOptions, tableExtentProperty?: ExtentProperty) {
     super(
       // Model factory — called once when the screen is first shown
-      () => new ConfigurationDetectiveModel(),
+      () => new ConfigurationDetectiveModel(tableExtentProperty),
       // View factory — receives the model instance
       (model) =>
         new ConfigurationDetectiveScreenView(model, {

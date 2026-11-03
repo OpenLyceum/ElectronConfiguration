@@ -5,8 +5,8 @@ Build orbital diagrams, discover periodic-table patterns, form common ions, and 
 ## Features
 
 - **Fill the Orbitals:** an energy-staircase orbital diagram you edit directly (click to cycle, drag electrons from a tray or between orbitals, U/D/Delete on the keyboard), Pauli shake, per-subshell feedback after Check, undo, and guided filling.
-- **Patterns in the Table:** a block-coloured table (H–Kr) with hover preview, "Step through the table" autoplay that pauses on the Cr/Cu exceptions, observed vs. filling-rule notation, and inner/outer shell counts.
-- **Make an Ion:** fifteen common ions, proton/electron tallies, electrons animated to and from the surroundings (4s empties before 3d), and a neutral comparison.
+- **Patterns in the Table:** a block-coloured table (H–Rn, with the lanthanide row) with hover preview, "Step through the table" autoplay that pauses on the ground-state exceptions (Cr, Cu, Nb–Ag, La, Ce, Gd, Pt, Au), observed vs. filling-rule notation, and inner/outer shell counts.
+- **Make an Ion:** twenty-five common ions (from Na⁺ to Pb²⁺), proton/electron tallies, electrons animated to and from the surroundings (4s empties before 3d), and a neutral comparison.
 - **Configuration Detective:** eight repair, move-the-misplaced-electron, identify, isoelectronic, and classification challenges, with large answer tiles and a star per solved challenge.
 - Block-tinted configuration chips, an optional count-by-shell view, rules in per-screen info dialogs, English/French/Spanish, keyboard access, live screen summaries, projector colors, and portrait scrolling.
 
@@ -21,7 +21,7 @@ npm ci
 npm start
 ```
 
-Use `?z=26` to start the neutral exploration at iron. Standard SceneryStack parameters include `?locale=fr`, `?colorProfile=projector` and `?screens=2`.
+Elements run H–Rn by default. Use Preferences → Simulation or `?maxZ=36` (through Kr) / `?maxZ=54` (through Xe) to limit the table, as in PeriodicTrends. Use `?z=26` to start the neutral exploration at iron. Standard SceneryStack parameters include `?locale=fr`, `?colorProfile=projector` and `?screens=2`.
 
 ## Scripts
 

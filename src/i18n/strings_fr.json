@@ -24,7 +24,7 @@
     "rules": "Pauli : au plus deux flèches opposées par orbitale. Hund : occuper séparément les orbitales de même énergie avec des flèches parallèles avant d’apparier. Aufbau est un guide avec des exceptions observées.",
     "core": "Électrons des couches internes : {{core}} · couche externe : {{outer}}",
     "transition": "Dans le bloc d, les électrons d peuvent aussi participer aux liaisons.",
-    "exception": "La référence observée diffère du guide simple (Cr, Cu). Les interactions électroniques comptent ; le diagramme ne calcule pas les énergies.",
+    "exception": "L’état fondamental observé diffère de la règle de remplissage simple (exceptions comme Cr, Cu, Pd, Gd, Pt et Au). Les interactions entre électrons comptent ; le diagramme n’est pas un calcul d’énergie.",
     "ion": "Choisir un ion",
     "addElectron": "Gagner un électron",
     "loseElectron": "Perdre un électron",
@@ -59,7 +59,8 @@
     "netCharge": "Charge nette {{charge}}",
     "progress": "{{solved}} résolus sur {{total}}",
     "observed": "Observé :",
-    "predicted": "Règle de remplissage :"
+    "predicted": "Règle de remplissage :",
+    "fBlock": "bloc f"
   },
   "messages": {
     "ready": "Explorez le diagramme ou vérifiez votre prédiction.",
@@ -75,7 +76,7 @@
     "ionReady": "Gagnez ou perdez des électrons un à un jusqu’à ce que le diagramme montre l’ion cible.",
     "choose": "Choisissez une réponse.",
     "limit": "Cette étape dépasserait l’ion cible ou l’atome neutre. Essayez l’autre bouton.",
-    "anomaly": "Dernier électron placé. L’état fondamental observé réarrange les électrons 4s et 3d par rapport à la règle de remplissage simple."
+    "anomaly": "Dernier électron placé. L’état fondamental observé réarrange les électrons par rapport à la règle de remplissage simple."
   },
   "lessons": {
     "fill": "Construire un diagramme orbital",
@@ -98,7 +99,11 @@
   },
   "preferences": {
     "title": "Simulation",
-    "note": "Utilisez Visuel et Langue pour le mode projecteur et la langue."
+    "note": "Utilisez Visuel et Langue pour le mode projecteur et la langue.",
+    "tableExtent": "Tableau périodique affiché",
+    "throughKrypton": "Jusqu'au krypton (Z = 1–36)",
+    "throughXenon": "Jusqu'au xénon (Z = 1–54)",
+    "throughRadon": "Jusqu'au radon (Z = 1–86, avec les lanthanides)"
   },
   "a11y": {
     "play": "Les cases montrent l’occupation et les projections de spin. La notation suit le diagramme.",

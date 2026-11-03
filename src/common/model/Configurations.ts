@@ -1,6 +1,19 @@
-/** Occupancy model for H–Kr. Orbital arrows label spin projections, not moving electrons. */
-export const SYMBOLS =
-  "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr".split(" ");
+/**
+ * Occupancy model for H–Rn (Z = 1–86). Orbital arrows label spin projections, not moving electrons.
+ * How much of the table a session shows (through Kr, Xe or Rn) is chosen by TableExtent.
+ */
+export const SYMBOLS = (
+  "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr " +
+  "Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe " +
+  "Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn"
+).split(" ");
+export const MIN_Z = 1;
+/** Last element with reference data. */
+export const MAX_Z = 86;
+/**
+ * Subshells in the introductory (aufbau) filling order, as far as radon needs, plus 7s so a promoted
+ * electron has somewhere to go. Appending keeps earlier orbital indices stable.
+ */
 export const SUBSHELLS = [
   { name: "1s", n: 1, l: 0 },
   { name: "2s", n: 2, l: 0 },
@@ -11,6 +24,13 @@ export const SUBSHELLS = [
   { name: "3d", n: 3, l: 2 },
   { name: "4p", n: 4, l: 1 },
   { name: "5s", n: 5, l: 0 },
+  { name: "4d", n: 4, l: 2 },
+  { name: "5p", n: 5, l: 1 },
+  { name: "6s", n: 6, l: 0 },
+  { name: "4f", n: 4, l: 3 },
+  { name: "5d", n: 5, l: 2 },
+  { name: "6p", n: 6, l: 1 },
+  { name: "7s", n: 7, l: 0 },
 ] as const;
 export const ORBITALS = SUBSHELLS.flatMap((s, subshell) =>
   Array.from({ length: 2 * s.l + 1 }, (_, i) => ({ subshell, n: s.n, l: s.l, m: i - s.l, index: i })),
@@ -22,6 +42,9 @@ export const electronCount = (diagram: Diagram): number =>
   diagram.reduce((sum, bits) => sum + (bits & 1) + ((bits >> 1) & 1), 0);
 export const subshellCounts = (diagram: Diagram): number[] =>
   SUBSHELLS.map((_subshell, s) => electronCount(diagram.filter((_, i) => ORBITALS[i]?.subshell === s)));
+const subshellIndex = (name: string): number => SUBSHELLS.findIndex((s) => s.name === name);
+/** Electrons the diagram can hold in total. */
+export const CAPACITY = SUBSHELLS.reduce((sum, s) => sum + 2 * (2 * s.l + 1), 0);
 export function fillingPrediction(electrons: number): number[] {
   const result: number[] = [];
   let remaining = electrons;
@@ -32,19 +55,46 @@ export function fillingPrediction(electrons: number): number[] {
   }
   return result;
 }
-/** Neutral atoms whose observed ground state differs from the simple filling rule (within H–Kr). */
-export const isFillingException = (z: number): boolean => z === 24 || z === 29;
+/**
+ * Neutral ground-state configurations that differ from the simple filling rule (NIST Atomic Spectra
+ * Database), as the subshell counts that change. Cr, Cu, Mo, Ag and Au move an s electron into d; Nb, Ru
+ * and Rh also end with 5s¹; Pd has no 5s electron; Pt is 5d⁹ 6s¹; La, Ce and Gd put an electron in 5d
+ * instead of 4f. These are reference data, not deductions from a half-filled/filled stability rule.
+ */
+export const FILLING_EXCEPTIONS: Readonly<Record<number, Readonly<Record<string, number>>>> = {
+  24: { "4s": 1, "3d": 5 },
+  29: { "4s": 1, "3d": 10 },
+  41: { "5s": 1, "4d": 4 },
+  42: { "5s": 1, "4d": 5 },
+  44: { "5s": 1, "4d": 7 },
+  45: { "5s": 1, "4d": 8 },
+  46: { "5s": 0, "4d": 10 },
+  47: { "5s": 1, "4d": 10 },
+  57: { "4f": 0, "5d": 1 },
+  58: { "4f": 1, "5d": 1 },
+  64: { "4f": 7, "5d": 1 },
+  78: { "6s": 1, "5d": 9 },
+  79: { "6s": 1, "5d": 10 },
+};
+/** Neutral atoms whose observed ground state differs from the simple filling rule. */
+export const isFillingException = (z: number): boolean => FILLING_EXCEPTIONS[z] !== undefined;
 export function referenceCounts(z: number, charge = 0): number[] {
-  if (!Number.isInteger(z) || z < 1 || z > 36 || !Number.isInteger(charge) || z - charge < 0 || z - charge > 38) {
+  if (
+    !Number.isInteger(z) ||
+    z < MIN_Z ||
+    z > MAX_Z ||
+    !Number.isInteger(charge) ||
+    z - charge < 0 ||
+    z - charge > CAPACITY
+  ) {
     throw new Error("Unsupported atomic number or electron count");
   }
   const result = fillingPrediction(z);
-  // Neutral reference exceptions, checked against NIST atomic data; not inferred from a half-filled slogan.
-  if (isFillingException(z)) {
-    result[5] = (result[5] ?? 0) - 1;
-    result[6] = (result[6] ?? 0) + 1;
+  for (const [name, count] of Object.entries(FILLING_EXCEPTIONS[z] ?? {})) {
+    result[subshellIndex(name)] = count;
   }
   if (charge > 0) {
+    // Cations: remove from the highest n first, then the highest l (so ns before (n−1)d).
     const removal = SUBSHELLS.map((_, i) => i).sort(
       (a, b) => (SUBSHELLS[b]?.n ?? 0) - (SUBSHELLS[a]?.n ?? 0) || (SUBSHELLS[b]?.l ?? 0) - (SUBSHELLS[a]?.l ?? 0),
     );
@@ -64,6 +114,52 @@ export function referenceCounts(z: number, charge = 0): number[] {
   }
   return result;
 }
+
+// ── Periodic-table layout (as in PeriodicTrends) ─────────────────────────────
+/** Last Z of each period. */
+export const PERIOD_ENDS = [2, 10, 18, 36, 54, 86] as const;
+/** La–Lu are drawn in a detached row under period 6, starting under group 3. */
+export const FIRST_LANTHANIDE = 57;
+export const LAST_LANTHANIDE = 71;
+export const isLanthanide = (z: number): boolean => z >= FIRST_LANTHANIDE && z <= LAST_LANTHANIDE;
+export const periodOf = (z: number): number => PERIOD_ENDS.findIndex((end) => z <= end) + 1;
+/** IUPAC group of element z, or null for a lanthanide. */
+export function groupOf(z: number): number | null {
+  if (z === 1) {
+    return 1;
+  }
+  if (z === 2) {
+    return 18;
+  }
+  if (isLanthanide(z)) {
+    return null;
+  }
+  const period = periodOf(z);
+  const column = z - (PERIOD_ENDS[period - 2] ?? 0);
+  if (period <= 3) {
+    return column <= 2 ? column : column + 10;
+  }
+  return period === 6 && z > LAST_LANTHANIDE ? column - 14 : column;
+}
+export type Block = "s" | "p" | "d" | "f";
+/** Periodic-table block; He sits in the s block, and the whole lanthanide row (La–Lu) is drawn as f. */
+export function block(z: number): Block {
+  const group = groupOf(z);
+  if (group === null) {
+    return "f";
+  }
+  if (z === 2 || group <= 2) {
+    return "s";
+  }
+  return group <= 12 ? "d" : "p";
+}
+/** Grid slot (0-based column 0–17, row 0–5 for periods, 6 for the lanthanide row). */
+export function tablePosition(z: number): { column: number; row: number } {
+  const group = groupOf(z);
+  return group === null ? { column: 2 + z - FIRST_LANTHANIDE, row: 6 } : { column: group - 1, row: periodOf(z) - 1 };
+}
+/** Noble gases used as shorthand cores. */
+export const NOBLE_GASES = [2, 10, 18, 36, 54, 86] as const;
 export function diagramForCounts(counts: readonly number[], limit = Infinity): number[] {
   const result = emptyDiagram();
   let remaining = limit;
@@ -94,9 +190,6 @@ export function guidedDiagram(z: number, electrons: number): number[] {
   const count = Math.max(0, Math.min(electrons, z));
   return count >= z ? referenceDiagram(z) : diagramForCounts(fillingPrediction(count));
 }
-const S_BLOCK = new Set([1, 2, 3, 4, 11, 12, 19, 20]);
-/** Periodic-table block (s, p or d) of element z within H–Kr; He is placed in the s block. */
-export const block = (z: number): "s" | "p" | "d" => (S_BLOCK.has(z) ? "s" : z >= 21 && z <= 30 ? "d" : "p");
 /** Orbital indices (into ORBITALS / a Diagram) belonging to each subshell. */
 export const SUBSHELL_ORBITALS: readonly (readonly number[])[] = SUBSHELLS.map((_, subshell) =>
   ORBITALS.flatMap((o, i) => (o.subshell === subshell ? [i] : [])),
@@ -127,9 +220,11 @@ export function subshellMarks(diagram: Diagram, z: number, charge = 0): Subshell
   });
 }
 export const noMarks = (): SubshellMark[] => SUBSHELLS.map(() => null);
-/** Marks the 4s and 3d subshells, where Cr and Cu depart from the simple filling rule. */
+/** Marks the subshells where an exception (Cr, Cu, Pd, Gd, …) departs from the simple filling rule. */
 export function exceptionMarks(z: number): SubshellMark[] {
-  return SUBSHELLS.map((s) => (isFillingException(z) && (s.name === "4s" || s.name === "3d") ? "note" : null));
+  const predicted = fillingPrediction(z),
+    observed = referenceCounts(z);
+  return SUBSHELLS.map((_, i) => (predicted[i] !== observed[i] ? "note" : null));
 }
 export type Assessment = "count" | "higher" | "hund" | "ground";
 export function assess(diagram: Diagram, z: number, charge = 0): Assessment {
@@ -158,7 +253,7 @@ export function configurationParts(counts: readonly number[], abbreviated = fals
   if (abbreviated) {
     const total = counts.reduce((sum, n) => sum + n, 0);
     // The core must be strictly smaller than the species, so Ne reads [He] 2s² 2p⁶ rather than a circular [Ne].
-    for (const candidate of [2, 10, 18, 36]) {
+    for (const candidate of NOBLE_GASES) {
       const c = referenceCounts(candidate);
       if (candidate < total && c.every((n, i) => n <= (counts[i] ?? 0))) {
         core = candidate;
@@ -201,7 +296,21 @@ export const IONS = [
   { z: 29, q: 1 },
   { z: 29, q: 2 },
   { z: 30, q: 2 },
+  // Through Xe: s-block cations, Ag⁺/Cd²⁺ (filled 4d), tin's two common ions (5p then 5s removed), iodide.
+  { z: 37, q: 1 },
+  { z: 38, q: 2 },
+  { z: 47, q: 1 },
+  { z: 48, q: 2 },
+  { z: 50, q: 2 },
+  { z: 50, q: 4 },
+  { z: 53, q: -1 },
+  // Through Rn: Cs⁺, Ba²⁺, and Pb²⁺, which keeps its 6s² pair.
+  { z: 55, q: 1 },
+  { z: 56, q: 2 },
+  { z: 82, q: 2 },
 ] as const;
+/** The curated ions available when the table runs through `maxZ`: always a prefix of IONS. */
+export const ionsThrough = (maxZ: number) => IONS.filter((ion) => ion.z <= maxZ);
 /** Chemical notation with a superscript charge, e.g. Na⁺, Fe³⁺, O²⁻. */
 export function species(z: number, q = 0): string {
   const magnitude = Math.abs(q) === 1 ? "" : toSuperscript(String(Math.abs(q)));

@@ -16,7 +16,8 @@ import { type Diagram, SUBSHELLS, subshellCounts } from "../model/Configurations
 const NUCLEUS_RADIUS = 18;
 const RING_SPACING = 17;
 const ELECTRON_RADIUS = 3.5;
-const MAX_N = 5;
+/** Highest shell any configuration through Rn (plus a promoted 7s electron) can reach. */
+const MAX_N = 7;
 
 /** Electrons per principal quantum number n (index n − 1). */
 export function shellCounts(diagram: Diagram): number[] {
@@ -30,13 +31,14 @@ export function shellCounts(diagram: Diagram): number[] {
 
 export class ShellNode extends VBox {
   private readonly disposeShellNode: () => void;
-  public constructor(diagramProperty: TReadOnlyProperty<Diagram>, zProperty: TReadOnlyProperty<number>) {
+  /** @param maxN - outermost shell the current table can reach; sets the fixed footprint so rings never jump */
+  public constructor(diagramProperty: TReadOnlyProperty<Diagram>, zProperty: TReadOnlyProperty<number>, maxN = 5) {
     const strings = StringManager.getInstance().getStrings();
     const atom = new Node();
     const caption = new Text(strings.common.shellCaptionStringProperty, {
       font: new PhetFont(10),
       fill: Colors.textColorProperty,
-      maxWidth: 2 * (NUCLEUS_RADIUS + MAX_N * RING_SPACING),
+      maxWidth: 2 * (NUCLEUS_RADIUS + maxN * RING_SPACING),
     });
     const shells = new DerivedProperty([diagramProperty], shellCounts);
     const paragraph = new DerivedProperty(
@@ -90,7 +92,7 @@ export class ShellNode extends VBox {
         }),
       );
       // Keep the full-size footprint so the layout doesn't jump as rings appear.
-      children.unshift(new Circle(NUCLEUS_RADIUS + (MAX_N - 1) * RING_SPACING + 4, { pickable: false }));
+      children.unshift(new Circle(NUCLEUS_RADIUS + Math.max(maxN, outer) * RING_SPACING + 4, { pickable: false }));
       atom.children = children;
     });
     this.disposeShellNode = () => {

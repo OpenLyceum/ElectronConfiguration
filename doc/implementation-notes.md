@@ -17,6 +17,7 @@ No general many-electron numerical solver or arbitrary ion configuration engine 
 
 Every action replaces the orbital array. Undo stores earlier arrays without mutating them.
 Changing the target element keeps manual work (and undo history) on Fill the Orbitals, so students can step Z up and add one electron; Patterns in the Table loads the reference. Edits that change nothing (Remove on an empty orbital, Clear on an empty diagram) do not add undo steps.
+The table extent (a shared `EnumerationProperty<TableExtent>` from the preferences model) is passed to each screen's model. Models narrow Z and the ion index with `setValueAndRange`, and re-apply the extent after `reset()` because NumberProperty resets restore their initial ranges. Views rebuild the main diagram, the neutral comparison and the periodic table on extent changes, disposing the old ones; Detective keeps the krypton diagram because its challenges are all within H–Kr.
 Ion targets have fixed endpoints; gain/loss buttons cannot move outside the selected neutral-to-ion interval.
 Challenge changes restore the specified starting diagram and clear prior feedback and undo history.
 The chemistry model is independent of Scenery nodes so reference fixtures run without a rendering engine.

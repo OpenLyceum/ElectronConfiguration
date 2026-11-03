@@ -15,13 +15,17 @@ import { formatCharge, species } from "../model/Configurations.js";
 const SQUARE = 6;
 const GAP = 1.5;
 const PER_GROUP = 5;
+/** Squares per row before wrapping (Pb has 82 protons). */
+const PER_ROW = 30;
 /** Squares in rows, with a small extra gap every five so counts can be read off. */
 function tally(count: number, filled: number, fill: TPaint): Node {
   const node = new Node();
   for (let i = 0; i < count; i++) {
-    const x = i * (SQUARE + GAP) + Math.floor(i / PER_GROUP) * 3;
+    const column = i % PER_ROW;
+    const x = column * (SQUARE + GAP) + Math.floor(column / PER_GROUP) * 3;
+    const y = Math.floor(i / PER_ROW) * (SQUARE * 2 + 3);
     node.addChild(
-      new Rectangle(x, 0, SQUARE, SQUARE * 2, {
+      new Rectangle(x, y, SQUARE, SQUARE * 2, {
         fill: i < filled ? fill : null,
         stroke: fill,
         lineWidth: 1,

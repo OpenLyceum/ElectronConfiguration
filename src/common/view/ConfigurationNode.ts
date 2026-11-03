@@ -6,7 +6,7 @@
  * string as a paragraph.
  */
 import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
-import { HBox, Node, Rectangle, Text, type TPaint } from "scenerystack/scenery";
+import { FlowBox, HBox, Node, Rectangle, Text, type TPaint } from "scenerystack/scenery";
 import { PhetFont } from "scenerystack/scenery-phet";
 import Colors from "../../ElectronConfigurationColors.js";
 import { configuration, configurationParts } from "../model/Configurations.js";
@@ -29,14 +29,28 @@ export class ConfigurationNode extends HBox {
     countsProperty: TReadOnlyProperty<readonly number[]>,
     abbreviated: boolean,
     labelProperty: TReadOnlyProperty<string>,
+    wrapWidth = 320,
   ) {
-    const chips = new HBox({ spacing: 4 });
+    // Long configurations (e.g. radon written in full) wrap onto further lines.
+    const chips = new FlowBox({
+      orientation: "horizontal",
+      wrap: true,
+      spacing: 4,
+      lineSpacing: 4,
+      justify: "left",
+      preferredWidth: wrapWidth,
+    });
     const label = new Text(labelProperty, { font: new PhetFont(13), fill: Colors.textColorProperty, maxWidth: 140 });
     const paragraph = new DerivedProperty(
       [countsProperty, labelProperty],
       (counts, text) => `${text} ${configuration(counts, abbreviated)}`,
     );
-    super({ spacing: 8, children: [label, chips], accessibleParagraph: paragraph });
+    super({
+      spacing: 8,
+      align: "top", // A plain Node keeps the HBox from shrinking the FlowBox to its minimum (one chip per line).
+      children: [label, new Node({ children: [chips] })],
+      accessibleParagraph: paragraph,
+    });
     const onCounts = (counts: readonly number[]) => {
       for (const child of chips.children.slice()) {
         child.dispose();

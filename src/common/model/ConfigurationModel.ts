@@ -5,6 +5,7 @@ import {
   NumberProperty,
   Property,
   StringUnionProperty,
+  type TReadOnlyProperty,
 } from "scenerystack/axon";
 import { Range } from "scenerystack/dot";
 import query from "../../preferences/electronConfigurationQueryParameters.js";
@@ -19,12 +20,16 @@ import {
   guidedDiagram,
   IONS,
   isFillingException,
+  MAX_Z,
+  MIN_Z,
   noMarks,
   ORBITALS,
   referenceDiagram,
   type SubshellMark,
+  subshellCounts,
   subshellMarks,
 } from "./Configurations.js";
+import { TableExtent } from "./TableExtent.js";
 export type ScreenKind = "fill" | "patterns" | "ions" | "detective";
 export const MESSAGES = [
   "ready",
@@ -47,7 +52,9 @@ const AUTOPLAY_EXCEPTION_PAUSE = 2.6;
 export type Spin = 1 | 2;
 export class ConfigurationModel {
   public readonly kind: ScreenKind;
-  public readonly zProperty = new NumberProperty(query.z, { range: new Range(1, 36), numberType: "Integer" });
+  /** Bounds Z, the curated ions and the diagram's subshells (Preferences → Simulation, `?maxZ`). */
+  public readonly tableExtentProperty: TReadOnlyProperty<TableExtent>;
+  public readonly zProperty = new NumberProperty(query.z, { range: new Range(MIN_Z, MAX_Z), numberType: "Integer" });
   public readonly chargeProperty = new NumberProperty(0);
   public readonly diagramProperty = new Property<Diagram>(emptyDiagram());
   public readonly selectedProperty = new NumberProperty(0, {
@@ -76,8 +83,11 @@ export class ConfigurationModel {
   private history: Diagram[] = [];
   private revealed = false;
   private autoplayElapsed = 0;
-  public constructor(kind: ScreenKind) {
+  private readonly disposeExtent: () => void;
+  public constructor(kind: ScreenKind, tableExtentProperty?: TReadOnlyProperty<TableExtent>) {
     this.kind = kind;
+    const ownedExtent = tableExtentProperty ? null : new Property(TableExtent.RADON);
+    this.tableExtentProperty = tableExtentProperty ?? (ownedExtent as TReadOnlyProperty<TableExtent>);
     this.zProperty.lazyLink(() => {
       if (kind === "patterns") {
         this.chargeProperty.value = 0;
@@ -106,7 +116,35 @@ export class ConfigurationModel {
         this.zProperty.value = this.zProperty.range.min;
       }
     });
+    const onExtent = () => this.applyExtent();
+    this.tableExtentProperty.lazyLink(onExtent);
+    this.disposeExtent = () => {
+      this.tableExtentProperty.unlink(onExtent);
+      ownedExtent?.dispose();
+    };
+    this.applyExtent();
     this.initialize();
+  }
+  /**
+   * Keeps Z, the ion list and Fill's diagram inside the current extent. Shrinking the table clamps Z (and
+   * the ion), and clears a Fill diagram that uses subshells the smaller diagram no longer draws.
+   */
+  private applyExtent(): void {
+    const extent = this.tableExtentProperty.value;
+    if (this.kind !== "detective") {
+      this.zProperty.setValueAndRange(Math.min(this.zProperty.value, extent.maxZ), new Range(MIN_Z, extent.maxZ));
+    }
+    if (this.kind === "ions") {
+      const last = extent.ionCount - 1;
+      this.ionIndexProperty.setValueAndRange(Math.min(this.ionIndexProperty.value, last), new Range(0, last));
+    }
+    if (
+      this.kind === "fill" &&
+      subshellCounts(this.diagramProperty.value).some((c, i) => c > 0 && i >= extent.levels)
+    ) {
+      this.clearHistory();
+      this.diagramProperty.value = emptyDiagram();
+    }
   }
   public get challenge() {
     return CHALLENGES[this.challengeIndexProperty.value] ?? CHALLENGES[0];
@@ -296,6 +334,8 @@ export class ConfigurationModel {
     this.solvedProperty.reset();
     this.autoplayProperty.reset();
     this.clearHistory();
+    // Resetting restores the full initial ranges; narrow them again to the current extent.
+    this.applyExtent();
     this.initialize();
   }
   /** The occupancy model has no time evolution; only the Patterns autoplay advances with time. */
@@ -328,5 +368,6 @@ export class ConfigurationModel {
     this.pauliEmitter.dispose();
     this.solvedProperty.dispose();
     this.autoplayProperty.dispose();
+    this.disposeExtent();
   }
 }

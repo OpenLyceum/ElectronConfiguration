@@ -24,7 +24,7 @@
     "rules": "Pauli: at most two opposite arrows per orbital. Hund: occupy equal-energy orbitals separately with parallel arrows before pairing. Aufbau is a filling guide with observed exceptions.",
     "core": "Inner-shell electrons: {{core}} · outermost-shell electrons: {{outer}}",
     "transition": "For d-block chemistry, the d electrons can also participate in bonding.",
-    "exception": "Observed reference differs from the simple filling rule (Cr, Cu). Electron interactions matter; the diagram is not an energy calculation.",
+    "exception": "The observed ground state differs from the simple filling rule (exceptions such as Cr, Cu, Pd, Gd, Pt and Au). Electron interactions matter; the diagram is not an energy calculation.",
     "ion": "Choose an ion",
     "addElectron": "Gain one electron",
     "loseElectron": "Lose one electron",
@@ -59,7 +59,8 @@
     "netCharge": "Net charge {{charge}}",
     "progress": "Solved {{solved}} of {{total}}",
     "observed": "Observed:",
-    "predicted": "Filling rule:"
+    "predicted": "Filling rule:",
+    "fBlock": "f block"
   },
   "messages": {
     "ready": "Explore the diagram or check your prediction.",
@@ -75,7 +76,7 @@
     "ionReady": "Gain or lose electrons one at a time until the diagram shows the target ion.",
     "choose": "Choose an answer.",
     "limit": "That step would go past the target ion or the neutral atom. Try the other button.",
-    "anomaly": "Last electron placed. The observed ground state rearranges the 4s and 3d electrons relative to the simple filling rule."
+    "anomaly": "Last electron placed. The observed ground state rearranges electrons relative to the simple filling rule."
   },
   "lessons": {
     "fill": "Build an orbital diagram",
@@ -98,7 +99,11 @@
   },
   "preferences": {
     "title": "Simulation",
-    "note": "Use Visual and Localization for projector mode and language."
+    "note": "Use Visual and Localization for projector mode and language.",
+    "tableExtent": "Periodic table shown",
+    "throughKrypton": "Through krypton (Z = 1–36)",
+    "throughXenon": "Through xenon (Z = 1–54)",
+    "throughRadon": "Through radon (Z = 1–86, with the lanthanides)"
   },
   "a11y": {
     "play": "Orbital boxes show occupancy and spin projections. Configuration notation updates with the diagram.",

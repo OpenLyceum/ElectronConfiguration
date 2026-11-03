@@ -36,8 +36,9 @@ const BOX_HEIGHT = 30;
 const BOX_SPACING = 4;
 const LEVEL_HEIGHT = 38;
 const AXIS_X = 8;
-/** Left edge of the s, p and d columns. */
-const COLUMN_X = [44, 112, 236];
+/** Left edge of the s, p, d and f columns. */
+const COLUMN_X = [44, 112, 236, 448];
+const columnWidth = (l: number) => (2 * l + 1) * (BOX_WIDTH + BOX_SPACING) - BOX_SPACING;
 const ARROW_FONT = new PhetFont({ size: 20, weight: "bold" });
 const DRAG_THRESHOLD = 6;
 const SHAKE_TIME = 0.4;
@@ -46,7 +47,8 @@ const FLY_TIME = 0.55;
 
 /** Block tint for a subshell with orbital quantum number l. */
 export const blockColor = (l: number): TPaint =>
-  l === 0 ? Colors.sBlockColorProperty : l === 1 ? Colors.pBlockColorProperty : Colors.dBlockColorProperty;
+  [Colors.sBlockColorProperty, Colors.pBlockColorProperty, Colors.dBlockColorProperty, Colors.fBlockColorProperty][l] ??
+  Colors.dBlockColorProperty;
 const markColor = (mark: SubshellMark): TPaint =>
   mark === "ok"
     ? Colors.okColorProperty
@@ -253,9 +255,11 @@ export class OrbitalBoardNode extends Node {
       owned.push({ dispose: () => highlightProperty.unlink(onHighlight) });
     }
 
-    // ── Tray (top-right corner, above 3d) ───────────────────────────────────
-    const trayLeft = COLUMN_X[2] ?? 0;
-    const trayTop = Math.max(0, levelTop(levels - 1));
+    // ── Tray (top of the rightmost column: above 3d through Xe, above 4f through Rn) ──
+    const drawn = SUBSHELLS.slice(0, levels);
+    const maxL = Math.max(...drawn.map((sub) => sub.l));
+    const trayLeft = COLUMN_X[maxL] ?? 0;
+    const trayTop = 0;
     let tray = options.trayNode;
     if (!tray && model) {
       tray = this.createSpinTray(model, editable, owned);
@@ -271,7 +275,10 @@ export class OrbitalBoardNode extends Node {
     const dLevel = SUBSHELLS.findIndex((sub) => sub.l === 2);
     if (options.insetNode && dLevel >= 0 && dLevel < levels) {
       const inset = options.insetNode;
-      const area = new Bounds2(trayLeft, levelTop(dLevel) + LEVEL_HEIGHT + 6, trayLeft + 5 * 36, height);
+      // Below 3d, from the d column to the board's right edge (which includes the f column through Rn).
+      const dLeft = COLUMN_X[2] ?? 0;
+      const right = Math.max(dLeft + columnWidth(2), (COLUMN_X[maxL] ?? 0) + columnWidth(maxL));
+      const area = new Bounds2(dLeft, levelTop(dLevel) + LEVEL_HEIGHT + 6, right, height);
       const place = () => {
         inset.setScaleMagnitude(1);
         const scale = Math.min(1, area.width / inset.width, area.height / inset.height);

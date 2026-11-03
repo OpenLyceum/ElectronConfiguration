@@ -30,9 +30,11 @@ import {
   block,
   CHALLENGES,
   type Diagram,
+  FIRST_LANTHANIDE,
   fillingPrediction,
   IONS,
   isFillingException,
+  LAST_LANTHANIDE,
   ORBITALS,
   referenceCounts,
   referenceDiagram,
@@ -40,7 +42,9 @@ import {
   SYMBOLS,
   species,
   subshellCounts,
+  tablePosition,
 } from "../model/Configurations.js";
+import { TableExtent } from "../model/TableExtent.js";
 import { ChargeTallyNode } from "./ChargeTallyNode.js";
 import { ConfigurationNode } from "./ConfigurationNode.js";
 import { ConfigurationSummary, type StatusKey, statusText } from "./ConfigurationSummary.js";
@@ -52,7 +56,16 @@ const LEFT = 20;
 const RIGHT = 510;
 const TEXT_WIDTH = 440;
 
-const blockColors = { s: Colors.sBlockColorProperty, p: Colors.pBlockColorProperty, d: Colors.dBlockColorProperty };
+const blockColors = {
+  s: Colors.sBlockColorProperty,
+  p: Colors.pBlockColorProperty,
+  d: Colors.dBlockColorProperty,
+  f: Colors.fBlockColorProperty,
+};
+/** Largest size each screen's main orbital diagram may take; bigger tables scale the diagram down to fit. */
+const BOARD_AREA = { fill: [470, 400], patterns: [470, 440], ions: [470, 380], detective: [470, 420] } as const;
+const scaleToFit = (node: Node, width: number, height: number) =>
+  node.setScaleMagnitude(Math.min(1, width / node.width, height / node.height));
 
 /** The subshell an element is filling: the last one occupied in its filling-rule prediction. */
 export const fillingSubshell = (z: number): number => {
@@ -213,21 +226,48 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       model.kind === "patterns"
         ? new DerivedProperty([previewZProperty, model.zProperty], (preview, z) => fillingSubshell(preview ?? z))
         : null;
-    const shells = new ShellNode(model.diagramProperty, model.zProperty);
-    shells.visibleProperty = showShellsProperty;
-    const surroundings = model.kind === "ions" ? this.createSurroundings(model) : null;
     const editing = model.kind === "fill" || model.kind === "detective";
-    const board = new OrbitalBoardNode(model.diagramProperty, {
-      model: editing ? model : null,
-      editableProperty,
-      selectedProperty: model.selectedProperty,
-      marksProperty: model.marksProperty,
-      highlightProperty,
-      levels: model.kind === "fill" || model.kind === "detective" ? SUBSHELLS.length : SUBSHELLS.length - 1,
-      trayNode: surroundings,
-      insetNode: shells,
-    });
-    this.boards.push(board);
+    // The diagram is rebuilt when the table extent changes: more subshells (and an f column) through Rn.
+    // Detective challenges all sit within H–Kr, so its diagram keeps the krypton layout.
+    const boardSlot = new Node();
+    let board: OrbitalBoardNode | null = null;
+    const buildBoard = (extent: TableExtent) => {
+      if (board) {
+        this.boards.splice(this.boards.indexOf(board), 1);
+        board.dispose(); // also disposes the shell view and surroundings it owns
+      }
+      const levels =
+        model.kind === "detective"
+          ? TableExtent.KRYPTON.levels
+          : model.kind === "fill"
+            ? extent.levels
+            : extent.levels - 1;
+      const shells = new ShellNode(
+        model.diagramProperty,
+        model.zProperty,
+        Math.max(...SUBSHELLS.slice(0, levels).map((sub) => sub.n)),
+      );
+      shells.visibleProperty = showShellsProperty;
+      board = new OrbitalBoardNode(model.diagramProperty, {
+        model: editing ? model : null,
+        editableProperty,
+        selectedProperty: model.selectedProperty,
+        marksProperty: model.marksProperty,
+        highlightProperty,
+        levels,
+        trayNode: model.kind === "ions" ? new SurroundingsNode(model.chargeProperty) : null,
+        insetNode: shells,
+      });
+      const [width, height] = BOARD_AREA[model.kind];
+      scaleToFit(board, width, height);
+      boardSlot.children = [board];
+      this.boards.push(board);
+    };
+    if (model.kind === "detective") {
+      buildBoard(TableExtent.KRYPTON);
+    } else {
+      model.tableExtentProperty.link(buildBoard);
+    }
 
     // Quantum numbers of the selected orbital, shown only when asked for.
     const selected = new DerivedProperty([model.selectedProperty, s.selectedStringProperty], (index, pattern) => {
@@ -281,13 +321,13 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         new HBox({
           spacing: 8,
           children: [
-            button(s.addElectronStringProperty, () => this.stepIon(model, board, -1)),
-            button(s.loseElectronStringProperty, () => this.stepIon(model, board, 1)),
+            button(s.addElectronStringProperty, () => board && this.stepIon(model, board, -1)),
+            button(s.loseElectronStringProperty, () => board && this.stepIon(model, board, 1)),
           ],
         }),
       );
     }
-    leftChildren.push(text(target, TEXT_WIDTH), board, selectedNode, actions);
+    leftChildren.push(text(target, TEXT_WIDTH), boardSlot, selectedNode, actions);
     const left = new VBox({
       align: "left",
       spacing: 8,
@@ -330,8 +370,8 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       spacing: 9,
       children: [
         statusNode,
-        fullNode,
-        ...(model.kind === "patterns" ? [] : [shortNode]),
+        // Patterns already shows the observed and filling-rule notation next to its table.
+        ...(model.kind === "patterns" ? [] : [fullNode, shortNode]),
         new HBox({ spacing: 20, children: [detailsControl, shellsControl] }),
       ],
     });
@@ -343,13 +383,20 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     }
     if (model.kind === "ions") {
       const neutral = new DerivedProperty([model.zProperty], (z) => referenceDiagram(z));
-      const neutralBoard = new OrbitalBoardNode(neutral, {
-        levels: SUBSHELLS.length - 1,
-        axis: false,
-        interactive: false,
-        label: s.neutralStringProperty,
+      const neutralSlot = new Node();
+      model.tableExtentProperty.link((extent) => {
+        for (const child of neutralSlot.children.slice()) {
+          child.dispose();
+        }
+        const neutralBoard = new OrbitalBoardNode(neutral, {
+          levels: extent.levels - 1,
+          axis: false,
+          interactive: false,
+          label: s.neutralStringProperty,
+        });
+        scaleToFit(neutralBoard, 260, 190);
+        neutralSlot.children = [neutralBoard];
       });
-      neutralBoard.setScaleMagnitude(0.5);
       specific.children = [
         new ChargeTallyNode(model.zProperty, model.chargeProperty),
         new VBox({
@@ -358,7 +405,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
           // The visible label is decorative; the board's own paragraph reads "Neutral atom: …".
           children: [
             new Text(s.neutralStringProperty, { font: new PhetFont(13), fill: Colors.textColorProperty }),
-            neutralBoard,
+            neutralSlot,
           ],
         }),
       ];
@@ -405,38 +452,6 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     });
   }
 
-  /** Make an Ion's tray: the electrons a cation has given up to its surroundings. */
-  private createSurroundings(model: ConfigurationModel): Node {
-    const s = StringManager.getInstance().getStrings().common;
-    const dots = new HBox({ spacing: 3 });
-    model.chargeProperty.link((q) => {
-      for (const child of dots.children.slice()) {
-        child.dispose();
-      }
-      dots.children = Array.from(
-        { length: Math.max(0, q) },
-        () => new Circle(5, { fill: Colors.electronColorProperty }),
-      );
-    });
-    const frame = new Rectangle(0, 0, 170, 26, 6, 6, { stroke: Colors.panelBorderColorProperty, lineDash: [4, 3] });
-    const row = new HBox({
-      spacing: 8,
-      children: [
-        new Text(s.surroundingsStringProperty, {
-          font: new PhetFont(12),
-          fill: Colors.textColorProperty,
-          maxWidth: 90,
-        }),
-        dots,
-      ],
-    });
-    row.boundsProperty.link(() => {
-      row.left = 8;
-      row.centerY = frame.centerY;
-    });
-    return new Node({ children: [frame, row] });
-  }
-
   /** Patterns in the Table: block-coloured table with hover preview, autoplay, and prediction vs observation. */
   private createPatterns(
     model: ConfigurationModel,
@@ -444,64 +459,81 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     text: (value: TReadOnlyProperty<string>, width?: number, size?: number) => Node,
   ): Node[] {
     const s = StringManager.getInstance().getStrings().common;
-    const positions = SYMBOLS.map((_, i) => {
-      const z = i + 1;
-      if (z === 1) {
-        return [0, 0];
-      }
-      if (z === 2) {
-        return [17, 0];
-      }
-      if (z <= 10) {
-        return [z <= 4 ? z - 3 : z + 7, 1];
-      }
-      if (z <= 18) {
-        return [z <= 12 ? z - 11 : z - 1, 2];
-      }
-      return [z - 19, 3];
-    });
+    // Rebuilt when the extent changes: four periods through Kr, five through Xe, six plus the lanthanide
+    // row through Rn (laid out as in PeriodicTrends, with a "57–71" placeholder in group 3 of period 6).
     const table = new Node();
-    SYMBOLS.forEach((symbol, i) => {
-      const z = i + 1;
-      const [column, row] = positions[i] ?? [0, 0];
-      const pick = new RectangularPushButton({
-        ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
-        baseColor: blockColors[block(z)],
-        content: new Text(symbol, { font: new PhetFont(11), fill: Colors.controlSurfaceTextColorProperty }),
-        minWidth: 23,
-        minHeight: 28,
-        xMargin: 1,
-        yMargin: 2,
-        accessibleName: `${z} ${symbol}`,
-        listener: () => {
-          model.autoplayProperty.value = false;
-          model.zProperty.value = z;
-        },
-      });
-      pick.left = (column ?? 0) * 26;
-      pick.top = (row ?? 0) * 32;
-      // Hover or focus previews the element without changing the diagram.
-      const show = () => {
-        previewZProperty.value = z;
-      };
-      const clear = () => {
-        if (previewZProperty.value === z) {
-          previewZProperty.value = null;
-        }
-      };
-      pick.addInputListener({ over: show, focus: show, out: clear, blur: clear });
-      const outline = new Rectangle(pick.bounds.dilated(2), {
-        stroke: Colors.accentColorProperty,
-        lineWidth: 2.5,
-        pickable: false,
-        visibleProperty: new DerivedProperty([model.zProperty], (current) => current === z),
-      });
-      table.addChild(pick);
-      table.addChild(outline);
-    });
-    const legend = new HBox({
-      spacing: 14,
-      children: (["s", "p", "d"] as const).map(
+    const legend = new HBox({ spacing: 14 });
+    const owned: { dispose(): void }[] = [];
+    const buildTable = (extent: TableExtent) => {
+      for (const item of owned.splice(0)) {
+        item.dispose();
+      }
+      for (const child of [...table.children, ...legend.children]) {
+        child.disposeSubtree();
+      }
+      const large = extent.maxZ > 36;
+      const pitch = large ? 25 : 32;
+      const cellHeight = large ? 22 : 28;
+      const rowTop = (row: number) => row * pitch + (row === 6 ? 8 : 0);
+      for (let z = 1; z <= extent.maxZ; z++) {
+        const symbol = SYMBOLS[z - 1] ?? "";
+        const { column, row } = tablePosition(z);
+        const pick = new RectangularPushButton({
+          ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
+          baseColor: blockColors[block(z)],
+          content: new Text(symbol, { font: new PhetFont(11), fill: Colors.controlSurfaceTextColorProperty }),
+          minWidth: 23,
+          minHeight: cellHeight,
+          xMargin: 1,
+          yMargin: 1,
+          accessibleName: `${z} ${symbol}`,
+          listener: () => {
+            model.autoplayProperty.value = false;
+            model.zProperty.value = z;
+          },
+        });
+        pick.left = column * 26;
+        pick.top = rowTop(row);
+        // Hover or focus previews the element without changing the diagram.
+        const show = () => {
+          previewZProperty.value = z;
+        };
+        const clear = () => {
+          if (previewZProperty.value === z) {
+            previewZProperty.value = null;
+          }
+        };
+        pick.addInputListener({ over: show, focus: show, out: clear, blur: clear });
+        const current = new DerivedProperty([model.zProperty], (value) => value === z);
+        owned.push(current);
+        table.addChild(pick);
+        table.addChild(
+          new Rectangle(pick.bounds.dilated(2), {
+            stroke: Colors.accentColorProperty,
+            lineWidth: 2.5,
+            pickable: false,
+            visibleProperty: current,
+          }),
+        );
+      }
+      if (extent.maxZ >= LAST_LANTHANIDE) {
+        const placeholder = new Rectangle(2 * 26, rowTop(5), 23, cellHeight, 3, 3, {
+          fill: Colors.fBlockColorProperty,
+          opacity: 0.5,
+        });
+        table.addChild(placeholder);
+        table.addChild(
+          new Text(`${FIRST_LANTHANIDE}–${LAST_LANTHANIDE}`, {
+            font: new PhetFont(7),
+            fill: Colors.controlSurfaceTextColorProperty,
+            center: placeholder.center,
+            maxWidth: 21,
+          }),
+        );
+      }
+      legend.children = (
+        extent.maxZ >= FIRST_LANTHANIDE ? (["s", "p", "d", "f"] as const) : (["s", "p", "d"] as const)
+      ).map(
         (b) =>
           new HBox({
             spacing: 5,
@@ -514,8 +546,9 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
               }),
             ],
           }),
-      ),
-    });
+      );
+    };
+    model.tableExtentProperty.link(buildTable);
     const autoplay = new HBox({
       spacing: 8,
       children: [
@@ -703,5 +736,43 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     for (const board of this.boards) {
       board.step(dt);
     }
+  }
+}
+
+/** Make an Ion's tray: the electrons a cation has given up to its surroundings. */
+class SurroundingsNode extends Node {
+  private readonly disposeSurroundings: () => void;
+  public constructor(chargeProperty: TReadOnlyProperty<number>) {
+    const s = StringManager.getInstance().getStrings().common;
+    const dots = new HBox({ spacing: 3 });
+    const frame = new Rectangle(0, 0, 170, 26, 6, 6, { stroke: Colors.panelBorderColorProperty, lineDash: [4, 3] });
+    const label = new Text(s.surroundingsStringProperty, {
+      font: new PhetFont(12),
+      fill: Colors.textColorProperty,
+      maxWidth: 90,
+    });
+    const row = new HBox({ spacing: 8, children: [label, dots] });
+    super({ children: [frame, row] });
+    const onCharge = (q: number) => {
+      for (const child of dots.children.slice()) {
+        child.dispose();
+      }
+      // Up to four electrons leave in the curated ions (Sn⁴⁺); anions bring theirs in from outside.
+      dots.children = Array.from(
+        { length: Math.max(0, q) },
+        () => new Circle(5, { fill: Colors.electronColorProperty }),
+      );
+      row.left = 8;
+      row.centerY = frame.centerY;
+    };
+    chargeProperty.link(onCharge);
+    this.disposeSurroundings = () => {
+      chargeProperty.unlink(onCharge);
+      label.dispose();
+    };
+  }
+  public override dispose(): void {
+    this.disposeSurroundings();
+    super.dispose();
   }
 }
