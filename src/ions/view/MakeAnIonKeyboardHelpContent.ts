@@ -1,14 +1,2 @@
-import {
-  BasicActionsKeyboardHelpSection,
-  ComboBoxKeyboardHelpSection,
-  SpinnerControlsKeyboardHelpSection,
-  TwoColumnKeyboardHelpContent,
-} from "scenerystack/scenery-phet";
-export class MakeAnIonKeyboardHelpContent extends TwoColumnKeyboardHelpContent {
-  public constructor() {
-    super(
-      [new SpinnerControlsKeyboardHelpSection(), new ComboBoxKeyboardHelpSection()],
-      [new BasicActionsKeyboardHelpSection({ withCheckboxContent: true })],
-    );
-  }
-}
+import { ElectronConfigurationKeyboardHelpContent } from "../../common/view/ElectronConfigurationKeyboardHelpContent.js";
+export class MakeAnIonKeyboardHelpContent extends ElectronConfigurationKeyboardHelpContent {}
