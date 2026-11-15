@@ -32,7 +32,7 @@ Elements run H–Rn by default. Use Preferences → Simulation or `?maxZ=36` (th
 - `npm run test:fuzz:quick` — short browser fuzz test.
 - `npm run icons` — generate icons from the source SVG.
 
-Run `npm run knip` to report unused files, exports, and dependencies (manual check).
+Run `npm run check:unused` (alias `npm run knip`) to report unused files, exports, and dependencies (manual check). Run `npm run check:architecture` for dependency-cruiser layer and cycle rules on `src/` (manual check).
 
 ## Tech Stack
 
