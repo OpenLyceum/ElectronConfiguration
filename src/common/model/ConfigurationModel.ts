@@ -31,7 +31,7 @@ import {
 } from "./Configurations.js";
 import { TableExtent } from "./TableExtent.js";
 export type ScreenKind = "fill" | "patterns" | "ions" | "detective";
-export const MESSAGES = [
+const MESSAGES = [
   "ready",
   "pauli",
   "count",

@@ -27,4 +27,4 @@ Run `npm run lint`, `npm run check`, `npm test`, `npm run build`, and `npm run t
 
 ## Compliance carve-outs
 
-No template infrastructure overrides. One-shot rename/scaffold scripts and their template-only generator tests are removed after creation. This static occupancy simulation has no TimeModel. The custom preferences model holds only the table extent; standard Visual and Localization preferences provide projector mode and language.
+No template infrastructure overrides. One-shot rename/scaffold scripts and their template-only generator tests are removed after creation. This static occupancy simulation has no TimeModel. The custom preferences model holds only the table extent; standard Visual and Localization preferences provide projector mode and language. Screen summaries use the shared `ConfigurationSummary` (extends `ScreenSummaryContent`) constructed in `ConfigurationScreenView`, not per-screen `*ScreenSummaryContent.ts` stubs.

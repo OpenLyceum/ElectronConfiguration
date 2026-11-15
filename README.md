@@ -32,6 +32,8 @@ Elements run H–Rn by default. Use Preferences → Simulation or `?maxZ=36` (th
 - `npm run test:fuzz:quick` — short browser fuzz test.
 - `npm run icons` — generate icons from the source SVG.
 
+Run `npm run knip` to report unused files, exports, and dependencies (manual check).
+
 ## Tech Stack
 
 TypeScript 7, SceneryStack 3, Vite 8, Vitest, Playwright, and Biome. Created from [SceneryStackTemplate](https://github.com/OpenLyceum/SceneryStackTemplate).

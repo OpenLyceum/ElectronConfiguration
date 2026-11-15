@@ -19,6 +19,7 @@ import { InfoButton, PhetFont, PlayPauseButton, ResetAllButton, StarNode } from 
 import { Dialog, type ScreenViewOptions } from "scenerystack/sim";
 import { Checkbox, NumberSpinner, RectangularPushButton } from "scenerystack/sun";
 import Colors from "../../ElectronConfigurationColors.js";
+import { SCREEN_VIEW_MARGIN } from "../../ElectronConfigurationConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import {
   FLAT_BUTTON_APPEARANCE_OPTIONS,
@@ -52,7 +53,7 @@ import { OrbitalBoardNode } from "./OrbitalBoardNode.js";
 import { ResponsiveScreenView } from "./ResponsiveScreenView.js";
 import { ShellNode } from "./ShellNode.js";
 
-const LEFT = 20;
+const LEFT = SCREEN_VIEW_MARGIN;
 const RIGHT = 510;
 const TEXT_WIDTH = 440;
 
@@ -68,7 +69,7 @@ const scaleToFit = (node: Node, width: number, height: number) =>
   node.setScaleMagnitude(Math.min(1, width / node.width, height / node.height));
 
 /** The subshell an element is filling: the last one occupied in its filling-rule prediction. */
-export const fillingSubshell = (z: number): number => {
+const fillingSubshell = (z: number): number => {
   const counts = fillingPrediction(z);
   let last = 0;
   counts.forEach((c, i) => {
@@ -425,8 +426,8 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         model.reset();
         this.resetView();
       },
-      right: this.layoutBounds.maxX - 20,
-      bottom: this.layoutBounds.maxY - 20,
+      right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
+      bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
     });
     this.resetView = () => {
       showShellsProperty.reset();

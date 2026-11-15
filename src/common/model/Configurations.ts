@@ -44,7 +44,7 @@ export const subshellCounts = (diagram: Diagram): number[] =>
   SUBSHELLS.map((_subshell, s) => electronCount(diagram.filter((_, i) => ORBITALS[i]?.subshell === s)));
 const subshellIndex = (name: string): number => SUBSHELLS.findIndex((s) => s.name === name);
 /** Electrons the diagram can hold in total. */
-export const CAPACITY = SUBSHELLS.reduce((sum, s) => sum + 2 * (2 * s.l + 1), 0);
+const CAPACITY = SUBSHELLS.reduce((sum, s) => sum + 2 * (2 * s.l + 1), 0);
 export function fillingPrediction(electrons: number): number[] {
   const result: number[] = [];
   let remaining = electrons;
@@ -117,14 +117,14 @@ export function referenceCounts(z: number, charge = 0): number[] {
 
 // ── Periodic-table layout (as in PeriodicTrends) ─────────────────────────────
 /** Last Z of each period. */
-export const PERIOD_ENDS = [2, 10, 18, 36, 54, 86] as const;
+const PERIOD_ENDS = [2, 10, 18, 36, 54, 86] as const;
 /** La–Lu are drawn in a detached row under period 6, starting under group 3. */
 export const FIRST_LANTHANIDE = 57;
 export const LAST_LANTHANIDE = 71;
-export const isLanthanide = (z: number): boolean => z >= FIRST_LANTHANIDE && z <= LAST_LANTHANIDE;
-export const periodOf = (z: number): number => PERIOD_ENDS.findIndex((end) => z <= end) + 1;
+const isLanthanide = (z: number): boolean => z >= FIRST_LANTHANIDE && z <= LAST_LANTHANIDE;
+const periodOf = (z: number): number => PERIOD_ENDS.findIndex((end) => z <= end) + 1;
 /** IUPAC group of element z, or null for a lanthanide. */
-export function groupOf(z: number): number | null {
+function groupOf(z: number): number | null {
   if (z === 1) {
     return 1;
   }
@@ -159,7 +159,7 @@ export function tablePosition(z: number): { column: number; row: number } {
   return group === null ? { column: 2 + z - FIRST_LANTHANIDE, row: 6 } : { column: group - 1, row: periodOf(z) - 1 };
 }
 /** Noble gases used as shorthand cores. */
-export const NOBLE_GASES = [2, 10, 18, 36, 54, 86] as const;
+const NOBLE_GASES = [2, 10, 18, 36, 54, 86] as const;
 export function diagramForCounts(counts: readonly number[], limit = Infinity): number[] {
   const result = emptyDiagram();
   let remaining = limit;
@@ -195,7 +195,7 @@ export const SUBSHELL_ORBITALS: readonly (readonly number[])[] = SUBSHELLS.map((
   ORBITALS.flatMap((o, i) => (o.subshell === subshell ? [i] : [])),
 );
 /** Hund's rule within one subshell: maximum unpaired electrons, all with parallel spin projections. */
-export function subshellFollowsHund(diagram: Diagram, subshell: number): boolean {
+function subshellFollowsHund(diagram: Diagram, subshell: number): boolean {
   const bits = (SUBSHELL_ORBITALS[subshell] ?? []).map((i) => diagram[i] ?? 0);
   const count = electronCount(bits),
     g = bits.length;
@@ -205,7 +205,7 @@ export function subshellFollowsHund(diagram: Diagram, subshell: number): boolean
     (singles.every((b) => b === 1) || singles.every((b) => b === 2))
   );
 }
-export const followsHund = (diagram: Diagram): boolean =>
+const followsHund = (diagram: Diagram): boolean =>
   SUBSHELLS.every((_, subshell) => subshellFollowsHund(diagram, subshell));
 /** Per-subshell feedback drawn on the diagram: "fault" (wrong count or Hund), "ok", or a neutral "note". */
 export type SubshellMark = "ok" | "fault" | "note" | null;
