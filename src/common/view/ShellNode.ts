@@ -19,7 +19,10 @@ const ELECTRON_RADIUS = 3.5;
 /** Highest shell any configuration through Rn (plus a promoted 7s electron) can reach. */
 const MAX_N = 7;
 
-/** Electrons per principal quantum number n (index n − 1). */
+/**
+ * Electrons per principal quantum number n (index n − 1).
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function shellCounts(diagram: Diagram): number[] {
   const counts = subshellCounts(diagram);
   const shells = Array.from({ length: MAX_N }, () => 0);

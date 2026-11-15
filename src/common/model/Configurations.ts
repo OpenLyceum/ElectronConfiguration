@@ -60,6 +60,7 @@ export function fillingPrediction(electrons: number): number[] {
  * Database), as the subshell counts that change. Cr, Cu, Mo, Ag and Au move an s electron into d; Nb, Ru
  * and Rh also end with 5s¹; Pd has no 5s electron; Pt is 5d⁹ 6s¹; La, Ce and Gd put an electron in 5d
  * instead of 4f. These are reference data, not deductions from a half-filled/filled stability rule.
+ * @internal Exported for unit tests; not part of the application API.
  */
 export const FILLING_EXCEPTIONS: Readonly<Record<number, Readonly<Record<string, number>>>> = {
   24: { "4s": 1, "3d": 5 },
@@ -160,6 +161,7 @@ export function tablePosition(z: number): { column: number; row: number } {
 }
 /** Noble gases used as shorthand cores. */
 const NOBLE_GASES = [2, 10, 18, 36, 54, 86] as const;
+/** @internal Exported for unit tests; not part of the application API. */
 export function diagramForCounts(counts: readonly number[], limit = Infinity): number[] {
   const result = emptyDiagram();
   let remaining = limit;
