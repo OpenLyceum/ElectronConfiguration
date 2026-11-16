@@ -1,3 +1,4 @@
+import { CONFIGURATIONS_SETTINGS } from "../../ElectronConfigurationConstants.js";
 /**
  * Occupancy model for H–Rn (Z = 1–86). Orbital arrows label spin projections, not moving electrons.
  * How much of the table a session shows (through Kr, Xe or Rn) is chosen by TableExtent.
@@ -9,7 +10,7 @@ export const SYMBOLS = (
 ).split(" ");
 export const MIN_Z = 1;
 /** Last element with reference data. */
-export const MAX_Z = 86;
+export const MAX_Z: number = CONFIGURATIONS_SETTINGS.MAX_Z;
 /**
  * Subshells in the introductory (aufbau) filling order, as far as radon needs, plus 7s so a promoted
  * electron has somewhere to go. Appending keeps earlier orbital indices stable.
@@ -120,8 +121,8 @@ export function referenceCounts(z: number, charge = 0): number[] {
 /** Last Z of each period. */
 const PERIOD_ENDS = [2, 10, 18, 36, 54, 86] as const;
 /** La–Lu are drawn in a detached row under period 6, starting under group 3. */
-export const FIRST_LANTHANIDE = 57;
-export const LAST_LANTHANIDE = 71;
+export const FIRST_LANTHANIDE: number = CONFIGURATIONS_SETTINGS.FIRST_LANTHANIDE;
+export const LAST_LANTHANIDE: number = CONFIGURATIONS_SETTINGS.LAST_LANTHANIDE;
 const isLanthanide = (z: number): boolean => z >= FIRST_LANTHANIDE && z <= LAST_LANTHANIDE;
 const periodOf = (z: number): number => PERIOD_ENDS.findIndex((end) => z <= end) + 1;
 /** IUPAC group of element z, or null for a lanthanide. */

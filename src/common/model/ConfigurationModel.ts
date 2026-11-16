@@ -8,6 +8,7 @@ import {
   type TReadOnlyProperty,
 } from "scenerystack/axon";
 import { Range } from "scenerystack/dot";
+import { CONFIGURATION_MODEL_SETTINGS } from "../../ElectronConfigurationConstants.js";
 import query from "../../preferences/electronConfigurationQueryParameters.js";
 import {
   assess,
@@ -47,8 +48,8 @@ const MESSAGES = [
 export type Message = (typeof MESSAGES)[number];
 const sameDiagram = (a: Diagram, b: Diagram): boolean => a.length === b.length && a.every((bits, i) => bits === b[i]);
 /** Seconds per element while stepping through the table, and the longer pause on Cr and Cu. */
-const AUTOPLAY_STEP = 0.9;
-const AUTOPLAY_EXCEPTION_PAUSE = 2.6;
+const AUTOPLAY_STEP: number = CONFIGURATION_MODEL_SETTINGS.AUTOPLAY_STEP;
+const AUTOPLAY_EXCEPTION_PAUSE: number = CONFIGURATION_MODEL_SETTINGS.AUTOPLAY_EXCEPTION_PAUSE;
 export type Spin = 1 | 2;
 export class ConfigurationModel {
   public readonly kind: ScreenKind;

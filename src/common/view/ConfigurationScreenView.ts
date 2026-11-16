@@ -19,7 +19,7 @@ import { InfoButton, PhetFont, PlayPauseButton, ResetAllButton, StarNode } from 
 import { Dialog, type ScreenViewOptions } from "scenerystack/sim";
 import { Checkbox, NumberSpinner, RectangularPushButton } from "scenerystack/sun";
 import Colors from "../../ElectronConfigurationColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../ElectronConfigurationConstants.js";
+import { CONFIGURATION_SCREEN_VIEW_SETTINGS, SCREEN_VIEW_MARGIN } from "../../ElectronConfigurationConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import {
   FLAT_BUTTON_APPEARANCE_OPTIONS,
@@ -54,8 +54,8 @@ import { ResponsiveScreenView } from "./ResponsiveScreenView.js";
 import { ShellNode } from "./ShellNode.js";
 
 const LEFT = SCREEN_VIEW_MARGIN;
-const RIGHT = 510;
-const TEXT_WIDTH = 440;
+const RIGHT: number = CONFIGURATION_SCREEN_VIEW_SETTINGS.RIGHT;
+const TEXT_WIDTH: number = CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_WIDTH;
 
 const blockColors = {
   s: Colors.sBlockColorProperty,
@@ -108,7 +108,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       s = strings.common;
 
     // ── Small factories ─────────────────────────────────────────────────────
-    const text = (value: string | TReadOnlyProperty<string>, width = TEXT_WIDTH, size = 14) =>
+    const text = (
+      value: string | TReadOnlyProperty<string>,
+      width = TEXT_WIDTH,
+      size: number = CONFIGURATION_SCREEN_VIEW_SETTINGS.DEFAULT_SIZE,
+    ) =>
       new RichText(value, {
         accessibleParagraph: value,
         font: new PhetFont(size),
@@ -121,9 +125,9 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
         ...(baseColor ? { baseColor } : {}),
         content: new RichText(label, {
-          font: new PhetFont(13),
+          font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.BUTTON_FONT_SIZE),
           fill: Colors.controlSurfaceTextColorProperty,
-          maxWidth: 240,
+          maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.BUTTON_MAX_WIDTH,
         }),
         accessibleName: label,
         listener: action,
@@ -137,7 +141,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         arrowsPosition: "leftRight",
         arrowButtonOptions: FLAT_RECTANGULAR_BUTTON_OPTIONS,
         numberDisplayOptions: {
-          textOptions: { font: new PhetFont(15) },
+          textOptions: { font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.SPINNER_FONT_SIZE) },
           minBackgroundWidth: format ? 55 : 35,
           numberFormatter: format,
         },
@@ -166,25 +170,27 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     const infoButton = new InfoButton({
       ...FLAT_BUTTON_APPEARANCE_OPTIONS,
       iconFill: Colors.accentColorProperty,
-      scale: 0.42,
+      scale: CONFIGURATION_SCREEN_VIEW_SETTINGS.INFO_BUTTON_SCALE,
       accessibleName: s.infoStringProperty,
       listener: () => {
         dialog ??= new Dialog(
           new VBox({
             align: "left",
-            spacing: 12,
+            spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.INFO_BUTTON_SPACING,
             children: infoParagraphs[model.kind].map(
               (paragraph) =>
                 new RichText(paragraph, {
-                  font: new PhetFont(15),
+                  font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.INFO_BUTTON_FONT_SIZE),
                   fill: Colors.controlSurfaceTextColorProperty,
-                  lineWrap: 560,
+                  lineWrap: CONFIGURATION_SCREEN_VIEW_SETTINGS.INFO_BUTTON_LINE_WRAP,
                   accessibleParagraph: paragraph,
                 }),
             ),
           }),
           {
-            title: new Text(s.infoStringProperty, { font: new PhetFont({ size: 20, weight: "bold" }) }),
+            title: new Text(s.infoStringProperty, {
+              font: new PhetFont({ size: CONFIGURATION_SCREEN_VIEW_SETTINGS.INFO_BUTTON_SIZE, weight: "bold" }),
+            }),
             fill: Colors.controlSurfaceColorProperty,
           },
         );
@@ -192,8 +198,15 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       },
     });
     const title = new HBox({
-      spacing: 10,
-      children: [text(strings.lessons[`${model.kind}StringProperty`], 380, 20), infoButton],
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.TITLE_SPACING,
+      children: [
+        text(
+          strings.lessons[`${model.kind}StringProperty`],
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.TITLE_WIDTH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.TITLE_SIZE,
+        ),
+        infoButton,
+      ],
     });
 
     // ── Target line ─────────────────────────────────────────────────────────
@@ -283,7 +296,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
           : "",
       });
     });
-    const selectedNode = text(selected, TEXT_WIDTH, 13);
+    const selectedNode = text(selected, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.SELECTED_NODE_SIZE);
     selectedNode.visibleProperty = model.detailsProperty;
 
     // ── Edit actions ────────────────────────────────────────────────────────
@@ -296,10 +309,16 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     ];
     const actions = new VBox({
       align: "left",
-      spacing: 6,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.ACTIONS_SPACING,
       children: [
-        new HBox({ spacing: 8, children: actionButtons.slice(0, 3) }),
-        new HBox({ spacing: 8, children: actionButtons.slice(3) }),
+        new HBox({
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_ACTIONS_SPACING,
+          children: actionButtons.slice(0, 3),
+        }),
+        new HBox({
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_ACTIONS_SPACING,
+          children: actionButtons.slice(3),
+        }),
       ],
     });
     actions.visibleProperty = editableProperty;
@@ -308,8 +327,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     if (model.kind === "fill" || model.kind === "patterns") {
       leftChildren.push(
         new HBox({
-          spacing: 12,
-          children: [text(s.elementStringProperty, 170), spinner(model.zProperty, s.elementStringProperty)],
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_SPACING,
+          children: [
+            text(s.elementStringProperty, CONFIGURATION_SCREEN_VIEW_SETTINGS.ELEMENT_TEXT_WIDTH),
+            spinner(model.zProperty, s.elementStringProperty),
+          ],
         }),
       );
     }
@@ -320,11 +342,14 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       };
       leftChildren.push(
         new HBox({
-          spacing: 12,
-          children: [text(s.ionStringProperty, 170), spinner(model.ionIndexProperty, s.ionStringProperty, ionName)],
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_SPACING,
+          children: [
+            text(s.ionStringProperty, CONFIGURATION_SCREEN_VIEW_SETTINGS.ION_TEXT_WIDTH),
+            spinner(model.ionIndexProperty, s.ionStringProperty, ionName),
+          ],
         }),
         new HBox({
-          spacing: 8,
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.SPACING,
           children: [
             button(s.addElectronStringProperty, () => board && this.stepIon(model, board, -1)),
             button(s.loseElectronStringProperty, () => board && this.stepIon(model, board, 1)),
@@ -335,11 +360,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     leftChildren.push(text(target, TEXT_WIDTH), boardSlot, selectedNode, actions);
     const left = new VBox({
       align: "left",
-      spacing: 8,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.LEFT_SPACING,
       children: leftChildren,
       excludeInvisibleChildrenFromBounds: true,
       left: LEFT,
-      top: 14,
+      top: CONFIGURATION_SCREEN_VIEW_SETTINGS.LEFT_TOP,
     });
 
     // ── Right column: status, configuration chips, display options ──────────
@@ -348,41 +373,74 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     status.key.link((key) => {
       const { glyph, color } = STATUS_ICON[key];
       icon.children = [
-        new Circle(11, { fill: color }),
+        new Circle(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_RADIUS, { fill: color }),
         new Text(glyph, {
-          font: new PhetFont({ size: 15, weight: "bold" }),
+          font: new PhetFont({ size: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_FONT_SIZE, weight: "bold" }),
           fill: Colors.backgroundColorProperty,
           centerX: 0,
           centerY: 0,
         }),
       ];
     });
-    const statusNode = new HBox({ spacing: 8, align: "top", children: [icon, text(status.property, 410, 14)] });
+    const statusNode = new HBox({
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.STATUS_NODE_SPACING,
+      align: "top",
+      children: [
+        icon,
+        text(
+          status.property,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.PROPERTY_TEXT_WIDTH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.PROPERTY_TEXT_SIZE,
+        ),
+      ],
+    });
     const countsProperty = new DerivedProperty([model.diagramProperty], (d: Diagram) => subshellCounts(d));
     const fullNode = new ConfigurationNode(countsProperty, false, s.fullStringProperty);
     const shortNode = new ConfigurationNode(countsProperty, true, s.shortStringProperty);
-    const checkboxOptions = { checkboxColor: Colors.textColorProperty, boxWidth: 16 };
-    const detailsControl = new Checkbox(model.detailsProperty, text(s.detailsStringProperty, 180, 13), {
-      ...checkboxOptions,
-      accessibleName: s.detailsStringProperty,
-    });
-    const shellsControl = new Checkbox(showShellsProperty, text(s.shellsStringProperty, 200, 13), {
-      ...checkboxOptions,
-      accessibleName: s.shellsStringProperty,
-    });
+    const checkboxOptions = {
+      checkboxColor: Colors.textColorProperty,
+      boxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHECKBOX_OPTIONS_BOX_WIDTH,
+    };
+    const detailsControl = new Checkbox(
+      model.detailsProperty,
+      text(
+        s.detailsStringProperty,
+        CONFIGURATION_SCREEN_VIEW_SETTINGS.DETAILS_TEXT_WIDTH,
+        CONFIGURATION_SCREEN_VIEW_SETTINGS.DETAILS_TEXT_SIZE,
+      ),
+      {
+        ...checkboxOptions,
+        accessibleName: s.detailsStringProperty,
+      },
+    );
+    const shellsControl = new Checkbox(
+      showShellsProperty,
+      text(
+        s.shellsStringProperty,
+        CONFIGURATION_SCREEN_VIEW_SETTINGS.SHELLS_TEXT_WIDTH,
+        CONFIGURATION_SCREEN_VIEW_SETTINGS.SHELLS_TEXT_SIZE,
+      ),
+      {
+        ...checkboxOptions,
+        accessibleName: s.shellsStringProperty,
+      },
+    );
     const commonInfo = new VBox({
       align: "left",
-      spacing: 9,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.COMMON_INFO_SPACING,
       children: [
         statusNode,
         // Patterns already shows the observed and filling-rule notation next to its table.
         ...(model.kind === "patterns" ? [] : [fullNode, shortNode]),
-        new HBox({ spacing: 20, children: [detailsControl, shellsControl] }),
+        new HBox({
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_COMMON_INFO_SPACING,
+          children: [detailsControl, shellsControl],
+        }),
       ],
     });
 
     // ── Screen-specific visuals ─────────────────────────────────────────────
-    const specific = new VBox({ align: "left", spacing: 10 });
+    const specific = new VBox({ align: "left", spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.SPECIFIC_SPACING });
     if (model.kind === "patterns") {
       specific.children = this.createPatterns(model, previewZProperty, text);
     }
@@ -399,17 +457,24 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
           interactive: false,
           label: s.neutralStringProperty,
         });
-        scaleToFit(neutralBoard, 260, 190);
+        scaleToFit(
+          neutralBoard,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.SCALE_TO_FIT_WIDTH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.SCALE_TO_FIT_HEIGHT,
+        );
         neutralSlot.children = [neutralBoard];
       });
       specific.children = [
         new ChargeTallyNode(model.zProperty, model.chargeProperty),
         new VBox({
           align: "left",
-          spacing: 4,
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_SPACING,
           // The visible label is decorative; the board's own paragraph reads "Neutral atom: …".
           children: [
-            new Text(s.neutralStringProperty, { font: new PhetFont(13), fill: Colors.textColorProperty }),
+            new Text(s.neutralStringProperty, {
+              font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.SPECIFIC_FONT_SIZE),
+              fill: Colors.textColorProperty,
+            }),
             neutralSlot,
           ],
         }),
@@ -419,7 +484,13 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       specific.children = this.createDetective(model, text, button);
     }
 
-    const right = new VBox({ align: "left", spacing: 14, children: [specific, commonInfo], left: RIGHT, top: 16 });
+    const right = new VBox({
+      align: "left",
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.RIGHT_SPACING,
+      children: [specific, commonInfo],
+      left: RIGHT,
+      top: CONFIGURATION_SCREEN_VIEW_SETTINGS.RIGHT_TOP,
+    });
     const reset = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
@@ -467,7 +538,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     // Rebuilt when the extent changes: four periods through Kr, five through Xe, six plus the lanthanide
     // row through Rn (laid out as in PeriodicTrends, with a "57–71" placeholder in group 3 of period 6).
     const table = new Node();
-    const legend = new HBox({ spacing: 14 });
+    const legend = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.LEGEND_SPACING });
     const owned: { dispose(): void }[] = [];
     const buildTable = (extent: TableExtent) => {
       for (const item of owned.splice(0)) {
@@ -486,8 +557,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         const pick = new RectangularPushButton({
           ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
           baseColor: blockColors[block(z)],
-          content: new Text(symbol, { font: new PhetFont(11), fill: Colors.controlSurfaceTextColorProperty }),
-          minWidth: 23,
+          content: new Text(symbol, {
+            font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.PICK_FONT_SIZE),
+            fill: Colors.controlSurfaceTextColorProperty,
+          }),
+          minWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.PICK_MIN_WIDTH,
           minHeight: cellHeight,
           xMargin: 1,
           yMargin: 1,
@@ -497,7 +571,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
             model.zProperty.value = z;
           },
         });
-        pick.left = column * 26;
+        pick.left = column * CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_LEFT_FACTOR;
         pick.top = rowTop(row);
         // Hover or focus previews the element without changing the diagram.
         const show = () => {
@@ -513,26 +587,34 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         owned.push(current);
         table.addChild(pick);
         table.addChild(
-          new Rectangle(pick.bounds.dilated(2), {
+          new Rectangle(pick.bounds.dilated(CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_DILATION), {
             stroke: Colors.accentColorProperty,
-            lineWidth: 2.5,
+            lineWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_LINE_WIDTH,
             pickable: false,
             visibleProperty: current,
           }),
         );
       }
       if (extent.maxZ >= LAST_LANTHANIDE) {
-        const placeholder = new Rectangle(2 * 26, rowTop(5), 23, cellHeight, 3, 3, {
-          fill: Colors.fBlockColorProperty,
-          opacity: 0.5,
-        });
+        const placeholder = new Rectangle(
+          2 * 26,
+          rowTop(5),
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.PLACEHOLDER_WIDTH,
+          cellHeight,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.PLACEHOLDER_CORNER_X,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.PLACEHOLDER_CORNER_Y,
+          {
+            fill: Colors.fBlockColorProperty,
+            opacity: CONFIGURATION_SCREEN_VIEW_SETTINGS.PLACEHOLDER_OPACITY,
+          },
+        );
         table.addChild(placeholder);
         table.addChild(
           new Text(`${FIRST_LANTHANIDE}–${LAST_LANTHANIDE}`, {
-            font: new PhetFont(7),
+            font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_FONT_SIZE),
             fill: Colors.controlSurfaceTextColorProperty,
             center: placeholder.center,
-            maxWidth: 21,
+            maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_MAX_WIDTH,
           }),
         );
       }
@@ -541,13 +623,21 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       ).map(
         (b) =>
           new HBox({
-            spacing: 5,
+            spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_SPACING,
             children: [
-              new Rectangle(0, 0, 14, 14, 3, 3, { fill: blockColors[b], stroke: Colors.panelBorderColorProperty }),
+              new Rectangle(
+                0,
+                0,
+                CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_WIDTH,
+                CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_HEIGHT,
+                CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_CORNER_X,
+                CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_CORNER_Y,
+                { fill: blockColors[b], stroke: Colors.panelBorderColorProperty },
+              ),
               new Text(s[`${b}BlockStringProperty`], {
-                font: new PhetFont(12),
+                font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.LEGEND_FONT_SIZE),
                 fill: Colors.textColorProperty,
-                maxWidth: 90,
+                maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_MAX_WIDTH,
               }),
             ],
           }),
@@ -555,14 +645,18 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     };
     model.tableExtentProperty.link(buildTable);
     const autoplay = new HBox({
-      spacing: 8,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.AUTOPLAY_SPACING,
       children: [
         new PlayPauseButton(model.autoplayProperty, {
-          radius: 15,
+          radius: CONFIGURATION_SCREEN_VIEW_SETTINGS.AUTOPLAY_RADIUS,
           ...FLAT_BUTTON_APPEARANCE_OPTIONS,
           accessibleHelpText: s.autoplayStringProperty,
         }),
-        new Text(s.autoplayStringProperty, { font: new PhetFont(13), fill: Colors.textColorProperty, maxWidth: 200 }),
+        new Text(s.autoplayStringProperty, {
+          font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.AUTOPLAY_FONT_SIZE),
+          fill: Colors.textColorProperty,
+          maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.AUTOPLAY_MAX_WIDTH,
+        }),
       ],
     });
     // The previewed element (hover/focus) or the current one.
@@ -580,7 +674,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       true,
       s.predictedStringProperty,
     );
-    const exception = text(s.exceptionStringProperty, TEXT_WIDTH, 13);
+    const exception = text(
+      s.exceptionStringProperty,
+      TEXT_WIDTH,
+      CONFIGURATION_SCREEN_VIEW_SETTINGS.EXCEPTION_TEXT_SIZE,
+    );
     exception.visibleProperty = new DerivedProperty([shownZ], isFillingException);
     const core = new DerivedProperty([shownZ, s.coreStringProperty], (z, pattern) => {
       const counts = referenceCounts(z);
@@ -594,15 +692,24 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       return StringUtils.fillIn(pattern, { core: z - outer, outer });
     });
     return [
-      new VBox({ align: "left", spacing: 6, children: [table, legend] }),
+      new VBox({
+        align: "left",
+        spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_PATTERNS_SPACING,
+        children: [table, legend],
+      }),
       autoplay,
       new VBox({
         align: "left",
-        spacing: 6,
+        spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_PATTERNS_SPACING,
         excludeInvisibleChildrenFromBounds: true,
-        children: [text(previewLabel, TEXT_WIDTH, 14), observed, predicted, exception],
+        children: [
+          text(previewLabel, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE),
+          observed,
+          predicted,
+          exception,
+        ],
       }),
-      text(core, TEXT_WIDTH, 13),
+      text(core, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE_SEGMENT_2),
     ];
   }
 
@@ -630,12 +737,12 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         ...FLAT_RECTANGULAR_BUTTON_OPTIONS,
         baseColor: fill,
         content,
-        minWidth: 64,
-        minHeight: 64,
+        minWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.TILE_MIN_WIDTH,
+        minHeight: CONFIGURATION_SCREEN_VIEW_SETTINGS.TILE_MIN_HEIGHT,
         accessibleName: name,
         listener: () => model.answer(answer),
       });
-    const choices = new HBox({ spacing: 12 });
+    const choices = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICES_SPACING });
     model.challengeIndexProperty.link(() => {
       for (const child of choices.children.slice()) {
         child.disposeSubtree();
@@ -644,16 +751,16 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       if (c?.kind === "classify") {
         const label = (glyph: string, name: TReadOnlyProperty<string>) =>
           new HBox({
-            spacing: 8,
+            spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_SPACING,
             children: [
               new Text(glyph, {
-                font: new PhetFont({ size: 26, weight: "bold" }),
+                font: new PhetFont({ size: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_FONT_SIZE, weight: "bold" }),
                 fill: Colors.controlSurfaceTextColorProperty,
               }),
               new RichText(name, {
-                font: new PhetFont(13),
+                font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_FONT_SIZE_SEGMENT_2),
                 fill: Colors.controlSurfaceTextColorProperty,
-                lineWrap: 130,
+                lineWrap: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_LINE_WRAP,
               }),
             ],
           });
@@ -675,11 +782,17 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         choices.children = (c?.options ?? []).map((z) =>
           tile(
             new VBox({
-              spacing: 2,
+              spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICES_SPACING_VARIANT_2,
               children: [
-                new Text(String(z), { font: new PhetFont(11), fill: Colors.controlSurfaceTextColorProperty }),
+                new Text(String(z), {
+                  font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICES_FONT_SIZE),
+                  fill: Colors.controlSurfaceTextColorProperty,
+                }),
                 new Text(SYMBOLS[z - 1] ?? "", {
-                  font: new PhetFont({ size: 24, weight: "bold" }),
+                  font: new PhetFont({
+                    size: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_DETECTIVE_SIZE,
+                    weight: "bold",
+                  }),
                   fill: Colors.controlSurfaceTextColorProperty,
                 }),
               ],
@@ -698,7 +811,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     );
 
     // Progress: a star per challenge, filled once solved; the current one is underlined.
-    const stars = new HBox({ spacing: 4, align: "bottom" });
+    const stars = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.STARS_SPACING, align: "bottom" });
     const progress = new DerivedProperty([model.solvedProperty, s.progressStringProperty], (solved, pattern) =>
       StringUtils.fillIn(pattern, { solved: solved.filter(Boolean).length, total: CHALLENGES.length }),
     );
@@ -707,19 +820,34 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         child.dispose();
       }
       stars.children = model.solvedProperty.value.map((solved, i) => {
-        const star = new StarNode({ value: solved ? 1 : 0, starShapeOptions: { outerRadius: 10, innerRadius: 5 } });
-        const underline = new Rectangle(0, 0, 18, 3, {
-          fill: Colors.accentColorProperty,
-          // Opacity, not visibility, so every star keeps the same footprint in the row.
-          opacity: i === model.challengeIndexProperty.value ? 1 : 0,
+        const star = new StarNode({
+          value: solved ? 1 : 0,
+          starShapeOptions: {
+            outerRadius: CONFIGURATION_SCREEN_VIEW_SETTINGS.STAR_OUTER_RADIUS,
+            innerRadius: CONFIGURATION_SCREEN_VIEW_SETTINGS.STAR_INNER_RADIUS,
+          },
         });
-        return new VBox({ spacing: 3, children: [star, underline] });
+        const underline = new Rectangle(
+          0,
+          0,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.UNDERLINE_WIDTH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.UNDERLINE_HEIGHT,
+          {
+            fill: Colors.accentColorProperty,
+            // Opacity, not visibility, so every star keeps the same footprint in the row.
+            opacity: i === model.challengeIndexProperty.value ? 1 : 0,
+          },
+        );
+        return new VBox({
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.UPDATE_STARS_SPACING,
+          children: [star, underline],
+        });
       });
     };
     model.solvedProperty.link(updateStars);
     model.challengeIndexProperty.lazyLink(updateStars);
     const progressRow = new HBox({
-      spacing: 14,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.PROGRESS_ROW_SPACING,
       children: [button(s.nextChallengeStringProperty, () => model.nextChallenge()), stars],
     });
     // The paragraph goes on the stars, not the row: a paragraph on a container that also holds a focusable
@@ -729,9 +857,9 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     return [
       new VBox({
         align: "left",
-        spacing: 10,
+        spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_DETECTIVE_SPACING,
         excludeInvisibleChildrenFromBounds: true,
-        children: [text(prompt, TEXT_WIDTH, 15), choices],
+        children: [text(prompt, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE_SEGMENT_3), choices],
       }),
       progressRow,
     ];
@@ -749,14 +877,28 @@ class SurroundingsNode extends Node {
   private readonly disposeSurroundings: () => void;
   public constructor(chargeProperty: TReadOnlyProperty<number>) {
     const s = StringManager.getInstance().getStrings().common;
-    const dots = new HBox({ spacing: 3 });
-    const frame = new Rectangle(0, 0, 170, 26, 6, 6, { stroke: Colors.panelBorderColorProperty, lineDash: [4, 3] });
+    const dots = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.DOTS_SPACING });
+    const frame = new Rectangle(
+      0,
+      0,
+      CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_WIDTH,
+      CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_HEIGHT,
+      CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_CORNER_X,
+      CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_CORNER_Y,
+      {
+        stroke: Colors.panelBorderColorProperty,
+        lineDash: [
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_LINE_DASH_DASH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FRAME_LINE_DASH_DASH,
+        ],
+      },
+    );
     const label = new Text(s.surroundingsStringProperty, {
-      font: new PhetFont(12),
+      font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_FONT_SIZE_SEGMENT_3),
       fill: Colors.textColorProperty,
-      maxWidth: 90,
+      maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_MAX_WIDTH,
     });
-    const row = new HBox({ spacing: 8, children: [label, dots] });
+    const row = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.ROW_SPACING, children: [label, dots] });
     super({ children: [frame, row] });
     const onCharge = (q: number) => {
       for (const child of dots.children.slice()) {
@@ -765,9 +907,9 @@ class SurroundingsNode extends Node {
       // Up to four electrons leave in the curated ions (Sn⁴⁺); anions bring theirs in from outside.
       dots.children = Array.from(
         { length: Math.max(0, q) },
-        () => new Circle(5, { fill: Colors.electronColorProperty }),
+        () => new Circle(CONFIGURATION_SCREEN_VIEW_SETTINGS.DOTS_RADIUS, { fill: Colors.electronColorProperty }),
       );
-      row.left = 8;
+      row.left = CONFIGURATION_SCREEN_VIEW_SETTINGS.LEFT_LEFT;
       row.centerY = frame.centerY;
     };
     chargeProperty.link(onCharge);

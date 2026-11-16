@@ -9,6 +9,7 @@ import { AquaRadioButtonGroup } from "scenerystack/sun";
 import type { Tandem } from "scenerystack/tandem";
 import { TableExtent } from "../common/model/TableExtent.js";
 import ElectronConfigurationColors from "../ElectronConfigurationColors.js";
+import { ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS } from "../ElectronConfigurationConstants.js";
 import { StringManager } from "../i18n/StringManager.js";
 import type { ElectronConfigurationPreferencesModel } from "./ElectronConfigurationPreferencesModel.js";
 
@@ -17,9 +18,9 @@ export class ElectronConfigurationPreferencesNode extends VBox {
     const strings = StringManager.getInstance().getPreferences();
     const optionText = (text: TReadOnlyProperty<string>) =>
       new Text(text, {
-        font: new PhetFont(14),
+        font: new PhetFont(ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.OPTION_TEXT_FONT_SIZE),
         fill: ElectronConfigurationColors.controlSurfaceTextColorProperty,
-        maxWidth: 430,
+        maxWidth: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.OPTION_TEXT_MAX_WIDTH,
       });
     const extentRadio = new AquaRadioButtonGroup(
       preferences.tableExtentProperty,
@@ -29,23 +30,32 @@ export class ElectronConfigurationPreferencesNode extends VBox {
         { value: TableExtent.RADON, label: strings.throughRadonStringProperty },
       ].map(({ value, label }) => ({ value, createNode: () => optionText(label), options: { accessibleName: label } })),
       {
-        spacing: 6,
-        radioButtonOptions: { radius: 7, selectedColor: ElectronConfigurationColors.controlSurfaceTextColorProperty },
+        spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.EXTENT_RADIO_SPACING,
+        radioButtonOptions: {
+          radius: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.EXTENT_RADIO_RADIUS,
+          selectedColor: ElectronConfigurationColors.controlSurfaceTextColorProperty,
+        },
         accessibleName: strings.tableExtentStringProperty,
       },
     );
     super({
       align: "left",
-      spacing: 12,
+      spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_SPACING,
       children: [
         new Text(strings.titleStringProperty, {
-          font: new PhetFont({ size: 18, weight: "bold" }),
+          font: new PhetFont({
+            size: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_FONT_SIZE,
+            weight: "bold",
+          }),
           fill: ElectronConfigurationColors.controlSurfaceTextColorProperty,
         }),
         new VBox({
           align: "left",
-          spacing: 6,
-          children: [optionText(strings.tableExtentStringProperty), new Node({ children: [extentRadio], x: 10 })],
+          spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.ITEM_2_SPACING,
+          children: [
+            optionText(strings.tableExtentStringProperty),
+            new Node({ children: [extentRadio], x: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_X }),
+          ],
         }),
         optionText(strings.noteStringProperty),
       ],

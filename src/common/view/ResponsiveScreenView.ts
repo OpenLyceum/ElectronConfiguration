@@ -10,14 +10,15 @@ import { DragListener, Node, Rectangle, type SceneryEvent, VBox } from "scenerys
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { VSlider } from "scenerystack/sun";
 import ElectronConfigurationColors from "../../ElectronConfigurationColors.js";
+import { RESPONSIVE_SCREEN_VIEW_SETTINGS } from "../../ElectronConfigurationConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import { ELECTRON_CONFIGURATION_SLIDER_OPTIONS } from "../ElectronConfigurationControlOptions.js";
 
-const PORTRAIT_WIDTH = 400;
-const MARGIN = 16;
-const CONTENT_WIDTH = 350;
-const SECTION_GAP = 24;
-const SCROLL_MARGIN = 12;
+const PORTRAIT_WIDTH: number = RESPONSIVE_SCREEN_VIEW_SETTINGS.PORTRAIT_WIDTH;
+const MARGIN: number = RESPONSIVE_SCREEN_VIEW_SETTINGS.MARGIN;
+const CONTENT_WIDTH: number = RESPONSIVE_SCREEN_VIEW_SETTINGS.CONTENT_WIDTH;
+const SECTION_GAP: number = RESPONSIVE_SCREEN_VIEW_SETTINGS.SECTION_GAP;
+const SCROLL_MARGIN: number = RESPONSIVE_SCREEN_VIEW_SETTINGS.SCROLL_MARGIN;
 export class ResponsiveScreenView extends ScreenView {
   public readonly portraitProperty = new BooleanProperty(false);
   public readonly scrollProperty = new NumberProperty(0, { range: new Range(0, 1) });
@@ -49,10 +50,16 @@ export class ResponsiveScreenView extends ScreenView {
     this.clip.children = [this.background, this.column];
     this.scrollBar = new VSlider(this.invertedScroll, new Range(0, 1), {
       ...ELECTRON_CONFIGURATION_SLIDER_OPTIONS,
-      trackSize: new Dimension2(3, 200),
-      thumbSize: new Dimension2(24, 40),
-      keyboardStep: 0.06,
-      shiftKeyboardStep: 0.015,
+      trackSize: new Dimension2(
+        RESPONSIVE_SCREEN_VIEW_SETTINGS.SCROLL_BAR_WIDTH,
+        RESPONSIVE_SCREEN_VIEW_SETTINGS.SCROLL_BAR_HEIGHT,
+      ),
+      thumbSize: new Dimension2(
+        RESPONSIVE_SCREEN_VIEW_SETTINGS.DIMENSION2_WIDTH,
+        RESPONSIVE_SCREEN_VIEW_SETTINGS.DIMENSION2_HEIGHT,
+      ),
+      keyboardStep: RESPONSIVE_SCREEN_VIEW_SETTINGS.SCROLL_BAR_KEYBOARD_STEP,
+      shiftKeyboardStep: RESPONSIVE_SCREEN_VIEW_SETTINGS.SCROLL_BAR_SHIFT_KEYBOARD_STEP,
       accessibleName: strings.scrollStringProperty,
       accessibleHelpText: strings.helpStringProperty,
     });
@@ -187,7 +194,7 @@ export class ResponsiveScreenView extends ScreenView {
     this.background.setRect(0, 0, PORTRAIT_WIDTH, this.viewportHeight);
     this.clip.clipArea = Shape.rect(0, 0, PORTRAIT_WIDTH, this.viewportHeight);
     this.scrollBar.preferredHeight = Math.max(50, this.viewportHeight - 60);
-    this.scrollBar.centerX = PORTRAIT_WIDTH - 16;
+    this.scrollBar.centerX = PORTRAIT_WIDTH - RESPONSIVE_SCREEN_VIEW_SETTINGS.LAYOUT_CENTER_X_OFFSET;
     this.scrollBar.centerY = this.viewportHeight / 2;
     this.updateScrollRange();
   }

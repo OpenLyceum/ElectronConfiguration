@@ -9,14 +9,15 @@ import { StringUtils } from "scenerystack/phetcommon";
 import { HBox, Node, Rectangle, Text, type TPaint, VBox } from "scenerystack/scenery";
 import { PhetFont } from "scenerystack/scenery-phet";
 import Colors from "../../ElectronConfigurationColors.js";
+import { CHARGE_TALLY_NODE_SETTINGS } from "../../ElectronConfigurationConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import { formatCharge, species } from "../model/Configurations.js";
 
-const SQUARE = 6;
-const GAP = 1.5;
-const PER_GROUP = 5;
+const SQUARE: number = CHARGE_TALLY_NODE_SETTINGS.SQUARE;
+const GAP: number = CHARGE_TALLY_NODE_SETTINGS.GAP;
+const PER_GROUP: number = CHARGE_TALLY_NODE_SETTINGS.PER_GROUP;
 /** Squares per row before wrapping (Pb has 82 protons). */
-const PER_ROW = 30;
+const PER_ROW: number = CHARGE_TALLY_NODE_SETTINGS.PER_ROW;
 /** Squares in rows, with a small extra gap every five so counts can be read off. */
 function tally(count: number, filled: number, fill: TPaint): Node {
   const node = new Node();
@@ -39,7 +40,11 @@ export class ChargeTallyNode extends VBox {
   private readonly disposeChargeTally: () => void;
   public constructor(zProperty: TReadOnlyProperty<number>, chargeProperty: TReadOnlyProperty<number>) {
     const s = StringManager.getInstance().getStrings().common;
-    const labelOptions = { font: new PhetFont(13), fill: Colors.textColorProperty, maxWidth: 90 };
+    const labelOptions = {
+      font: new PhetFont(CHARGE_TALLY_NODE_SETTINGS.LABEL_OPTIONS_FONT_SIZE),
+      fill: Colors.textColorProperty,
+      maxWidth: CHARGE_TALLY_NODE_SETTINGS.LABEL_OPTIONS_MAX_WIDTH,
+    };
     const protonLabel = new Text(s.protonsStringProperty, labelOptions);
     const electronLabel = new Text(s.electronsStringProperty, labelOptions);
     const protonCount = new Text("", labelOptions);
@@ -51,13 +56,13 @@ export class ChargeTallyNode extends VBox {
       (z, q, pattern) => `${StringUtils.fillIn(pattern, { charge: formatCharge(q) })} → ${species(z, q)}`,
     );
     const netText = new Text(net, {
-      font: new PhetFont({ size: 17, weight: "bold" }),
+      font: new PhetFont({ size: CHARGE_TALLY_NODE_SETTINGS.NET_TEXT_FONT_SIZE, weight: "bold" }),
       fill: Colors.textColorProperty,
-      maxWidth: 360,
+      maxWidth: CHARGE_TALLY_NODE_SETTINGS.NET_TEXT_MAX_WIDTH,
     });
     const row = (label: Node, count: Node, squares: Node) =>
       new HBox({
-        spacing: 8,
+        spacing: CHARGE_TALLY_NODE_SETTINGS.ROW_SPACING,
         children: [new Node({ children: [label] }), new Node({ children: [count] }), squares],
       });
     const paragraph = new DerivedProperty(
@@ -66,7 +71,7 @@ export class ChargeTallyNode extends VBox {
     );
     super({
       align: "left",
-      spacing: 6,
+      spacing: CHARGE_TALLY_NODE_SETTINGS.CONSTRUCTOR_SPACING,
       children: [
         row(protonLabel, protonCount, protonSquares),
         row(electronLabel, electronCount, electronSquares),

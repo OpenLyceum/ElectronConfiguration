@@ -5,18 +5,19 @@
  * neutral exploration screens at iron.
  */
 import { QueryStringMachine } from "scenerystack/query-string-machine";
+import { ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS } from "../ElectronConfigurationConstants.js";
 export default QueryStringMachine.getAll({
   /** Starting element on Fill the Orbitals and Patterns in the Table (clamped to `maxZ`). */
   z: {
     type: "number",
-    defaultValue: 6,
+    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_VALUE,
     public: true,
     isValidValue: (value: number) => Number.isInteger(value) && value >= 1 && value <= 86,
   },
   /** Last element offered: 36 (through Kr), 54 (through Xe) or 86 (through Rn, the default). */
   maxZ: {
     type: "number",
-    defaultValue: 86,
+    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_VALUE_VARIANT_2,
     validValues: [36, 54, 86],
     public: true,
   },

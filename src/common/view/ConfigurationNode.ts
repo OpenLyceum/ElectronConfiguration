@@ -9,16 +9,25 @@ import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { FlowBox, HBox, Node, Rectangle, Text, type TPaint } from "scenerystack/scenery";
 import { PhetFont } from "scenerystack/scenery-phet";
 import Colors from "../../ElectronConfigurationColors.js";
+import { CONFIGURATION_NODE_SETTINGS } from "../../ElectronConfigurationConstants.js";
 import { configuration, configurationParts } from "../model/Configurations.js";
 import { blockColor } from "./OrbitalBoardNode.js";
 
-const FONT = new PhetFont(15);
+const FONT = new PhetFont(CONFIGURATION_NODE_SETTINGS.FONT_FONT_SIZE);
 const chip = (text: string, fill: TPaint) => {
   const label = new Text(text, { font: FONT, fill: Colors.controlSurfaceTextColorProperty });
-  const background = new Rectangle(0, 0, label.width + 10, label.height + 4, 5, 5, {
-    fill,
-    stroke: Colors.panelBorderColorProperty,
-  });
+  const background = new Rectangle(
+    0,
+    0,
+    label.width + 10,
+    label.height + 4,
+    CONFIGURATION_NODE_SETTINGS.BACKGROUND_CORNER_X,
+    CONFIGURATION_NODE_SETTINGS.BACKGROUND_CORNER_Y,
+    {
+      fill,
+      stroke: Colors.panelBorderColorProperty,
+    },
+  );
   label.center = background.center;
   return new Node({ children: [background, label] });
 };
@@ -29,24 +38,28 @@ export class ConfigurationNode extends HBox {
     countsProperty: TReadOnlyProperty<readonly number[]>,
     abbreviated: boolean,
     labelProperty: TReadOnlyProperty<string>,
-    wrapWidth = 320,
+    wrapWidth: number = CONFIGURATION_NODE_SETTINGS.DEFAULT_WRAP_WIDTH,
   ) {
     // Long configurations (e.g. radon written in full) wrap onto further lines.
     const chips = new FlowBox({
       orientation: "horizontal",
       wrap: true,
-      spacing: 4,
+      spacing: CONFIGURATION_NODE_SETTINGS.CHIPS_SPACING,
       lineSpacing: 4,
       justify: "left",
       preferredWidth: wrapWidth,
     });
-    const label = new Text(labelProperty, { font: new PhetFont(13), fill: Colors.textColorProperty, maxWidth: 140 });
+    const label = new Text(labelProperty, {
+      font: new PhetFont(CONFIGURATION_NODE_SETTINGS.LABEL_FONT_SIZE),
+      fill: Colors.textColorProperty,
+      maxWidth: CONFIGURATION_NODE_SETTINGS.LABEL_MAX_WIDTH,
+    });
     const paragraph = new DerivedProperty(
       [countsProperty, labelProperty],
       (counts, text) => `${text} ${configuration(counts, abbreviated)}`,
     );
     super({
-      spacing: 8,
+      spacing: CONFIGURATION_NODE_SETTINGS.CONSTRUCTOR_SPACING,
       align: "top", // A plain Node keeps the HBox from shrinking the FlowBox to its minimum (one chip per line).
       children: [label, new Node({ children: [chips] })],
       accessibleParagraph: paragraph,

@@ -19,6 +19,7 @@ import { StringUtils } from "scenerystack/phetcommon";
 import { Circle, DragListener, KeyboardListener, Node, Rectangle, Text, type TPaint, VBox } from "scenerystack/scenery";
 import { ArrowNode, PhetFont } from "scenerystack/scenery-phet";
 import Colors from "../../ElectronConfigurationColors.js";
+import { ORBITAL_BOARD_NODE_SETTINGS } from "../../ElectronConfigurationConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { ConfigurationModel, Spin } from "../model/ConfigurationModel.js";
 import {
@@ -31,19 +32,19 @@ import {
   subshellCounts,
 } from "../model/Configurations.js";
 
-const BOX_WIDTH = 32;
-const BOX_HEIGHT = 30;
-const BOX_SPACING = 4;
-const LEVEL_HEIGHT = 38;
-const AXIS_X = 8;
+const BOX_WIDTH: number = ORBITAL_BOARD_NODE_SETTINGS.BOX_WIDTH;
+const BOX_HEIGHT: number = ORBITAL_BOARD_NODE_SETTINGS.BOX_HEIGHT;
+const BOX_SPACING: number = ORBITAL_BOARD_NODE_SETTINGS.BOX_SPACING;
+const LEVEL_HEIGHT: number = ORBITAL_BOARD_NODE_SETTINGS.LEVEL_HEIGHT;
+const AXIS_X: number = ORBITAL_BOARD_NODE_SETTINGS.AXIS_X;
 /** Left edge of the s, p, d and f columns. */
 const COLUMN_X = [44, 112, 236, 448];
 const columnWidth = (l: number) => (2 * l + 1) * (BOX_WIDTH + BOX_SPACING) - BOX_SPACING;
-const ARROW_FONT = new PhetFont({ size: 20, weight: "bold" });
-const DRAG_THRESHOLD = 6;
-const SHAKE_TIME = 0.4;
-const POP_TIME = 0.25;
-const FLY_TIME = 0.55;
+const ARROW_FONT = new PhetFont({ size: ORBITAL_BOARD_NODE_SETTINGS.ARROW_FONT_SIZE, weight: "bold" });
+const DRAG_THRESHOLD: number = ORBITAL_BOARD_NODE_SETTINGS.DRAG_THRESHOLD;
+const SHAKE_TIME: number = ORBITAL_BOARD_NODE_SETTINGS.SHAKE_TIME;
+const POP_TIME: number = ORBITAL_BOARD_NODE_SETTINGS.POP_TIME;
+const FLY_TIME: number = ORBITAL_BOARD_NODE_SETTINGS.FLY_TIME;
 
 /** Block tint for a subshell with orbital quantum number l. */
 export const blockColor = (l: number): TPaint =>
@@ -91,15 +92,23 @@ class OrbitalBox extends Node {
   public constructor(index: number, fill: TPaint) {
     super({ cursor: "pointer" });
     this.index = index;
-    const background = new Rectangle(0, 0, BOX_WIDTH, BOX_HEIGHT, 4, 4, {
-      fill,
-      stroke: Colors.controlSurfaceTextColorProperty,
-      lineWidth: 1,
-    });
+    const background = new Rectangle(
+      0,
+      0,
+      BOX_WIDTH,
+      BOX_HEIGHT,
+      ORBITAL_BOARD_NODE_SETTINGS.BACKGROUND_CORNER_X,
+      ORBITAL_BOARD_NODE_SETTINGS.BACKGROUND_CORNER_Y,
+      {
+        fill,
+        stroke: Colors.controlSurfaceTextColorProperty,
+        lineWidth: 1,
+      },
+    );
     this.up = new Text("↑", { font: ARROW_FONT, fill: Colors.controlSurfaceTextColorProperty });
     this.down = new Text("↓", { font: ARROW_FONT, fill: Colors.controlSurfaceTextColorProperty });
-    this.up.center = background.center.plusXY(-6, 0);
-    this.down.center = background.center.plusXY(6, 0);
+    this.up.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.PLUS_XY_X_OFFSET, 0);
+    this.down.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.PLUS_XY_X_OFFSET_SEGMENT_2, 0);
     this.children = [background, this.up, this.down];
   }
   public show(bits: number): void {
@@ -107,8 +116,14 @@ class OrbitalBox extends Node {
     this.down.visible = (bits & 2) !== 0;
     // A lone arrow sits in the middle; a pair sits side by side.
     const center = BOX_WIDTH / 2;
-    this.up.centerX = bits === 3 ? center - 6 : center;
-    this.down.centerX = bits === 3 ? center + 6 : center;
+    this.up.centerX =
+      bits === ORBITAL_BOARD_NODE_SETTINGS.SHOW_CENTER_X_FACTOR
+        ? center - ORBITAL_BOARD_NODE_SETTINGS.SHOW_CENTER_X_OFFSET
+        : center;
+    this.down.centerX =
+      bits === ORBITAL_BOARD_NODE_SETTINGS.SHOW_CENTER_X_FACTOR
+        ? center + ORBITAL_BOARD_NODE_SETTINGS.SHOW_CENTER_X_OFFSET
+        : center;
   }
 }
 
@@ -152,21 +167,21 @@ export class OrbitalBoardNode extends Node {
 
     // ── Energy axis ─────────────────────────────────────────────────────────
     if (options.axis) {
-      const axis = new ArrowNode(AXIS_X, height, AXIS_X, -4, {
-        headHeight: 9,
-        headWidth: 9,
-        tailWidth: 2,
+      const axis = new ArrowNode(AXIS_X, height, AXIS_X, ORBITAL_BOARD_NODE_SETTINGS.AXIS_END_Y, {
+        headHeight: ORBITAL_BOARD_NODE_SETTINGS.AXIS_HEAD_HEIGHT,
+        headWidth: ORBITAL_BOARD_NODE_SETTINGS.AXIS_HEAD_WIDTH,
+        tailWidth: ORBITAL_BOARD_NODE_SETTINGS.AXIS_TAIL_WIDTH,
         fill: Colors.textColorProperty,
         stroke: null,
       });
       const axisLabel = new Text(strings.common.energyAxisStringProperty, {
-        font: new PhetFont(11),
+        font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.AXIS_LABEL_FONT_SIZE),
         fill: Colors.textColorProperty,
         rotation: -Math.PI / 2,
-        maxWidth: height * 0.6,
+        maxWidth: height * ORBITAL_BOARD_NODE_SETTINGS.AXIS_LABEL_MAX_WIDTH_FACTOR,
       });
       axisLabel.boundsProperty.link(() => {
-        axisLabel.right = AXIS_X - 4;
+        axisLabel.right = AXIS_X - ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
         axisLabel.centerY = height / 2;
       });
       this.addChild(axis);
@@ -189,7 +204,7 @@ export class OrbitalBoardNode extends Node {
       groupBounds[subshell] = new Bounds2(x, y, x + width, y + BOX_HEIGHT + 6);
       groups.addChild(
         new Text(s.name, {
-          font: new PhetFont(13),
+          font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_FONT_SIZE),
           fill: Colors.textColorProperty,
           right: x - 5,
           centerY: y + BOX_HEIGHT / 2,
@@ -197,8 +212,12 @@ export class OrbitalBoardNode extends Node {
       );
       // Capacity bar: fills as the subshell fills (2, 6 or 10 electrons).
       const capacity = 2 * indices.length;
-      const track = new Rectangle(x, y + BOX_HEIGHT + 3, width, 3, { fill: Colors.panelBorderColorProperty });
-      const fill = new Rectangle(x, y + BOX_HEIGHT + 3, 0, 3, { fill: blockColor(s.l) });
+      const track = new Rectangle(x, y + BOX_HEIGHT + 3, width, ORBITAL_BOARD_NODE_SETTINGS.TRACK_HEIGHT, {
+        fill: Colors.panelBorderColorProperty,
+      });
+      const fill = new Rectangle(x, y + BOX_HEIGHT + 3, 0, ORBITAL_BOARD_NODE_SETTINGS.FILL_HEIGHT, {
+        fill: blockColor(s.l),
+      });
       const fillWidth = new DerivedProperty(
         [diagramProperty],
         (diagram) => (width * (subshellCounts(diagram)[subshell] ?? 0)) / capacity,
@@ -226,11 +245,25 @@ export class OrbitalBoardNode extends Node {
         const color = markColor(values[subshell] ?? null);
         return color
           ? [
-              new Rectangle(bounds.dilatedXY(5, 4), 6, 6, {
-                stroke: color,
-                lineWidth: 3,
-                lineDash: values[subshell] === "note" ? [6, 4] : [],
-              }),
+              new Rectangle(
+                bounds.dilatedXY(
+                  ORBITAL_BOARD_NODE_SETTINGS.MARKS_X_DILATION,
+                  ORBITAL_BOARD_NODE_SETTINGS.MARKS_Y_DILATION,
+                ),
+                ORBITAL_BOARD_NODE_SETTINGS.CHILDREN_Y,
+                ORBITAL_BOARD_NODE_SETTINGS.CHILDREN_WIDTH,
+                {
+                  stroke: color,
+                  lineWidth: ORBITAL_BOARD_NODE_SETTINGS.CHILDREN_LINE_WIDTH,
+                  lineDash:
+                    values[subshell] === "note"
+                      ? [
+                          ORBITAL_BOARD_NODE_SETTINGS.ON_MARKS_LINE_DASH_DASH,
+                          ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_ON_MARKS_LINE_DASH_DASH,
+                        ]
+                      : [],
+                },
+              ),
             ]
           : [];
       });
@@ -242,13 +275,26 @@ export class OrbitalBoardNode extends Node {
     }
     if (options.highlightProperty) {
       const highlightProperty = options.highlightProperty;
-      const glow = new Rectangle(0, 0, 1, 1, 6, 6, { fill: Colors.noteColorProperty, opacity: 0.35 });
+      const glow = new Rectangle(
+        0,
+        0,
+        1,
+        1,
+        ORBITAL_BOARD_NODE_SETTINGS.GLOW_CORNER_X,
+        ORBITAL_BOARD_NODE_SETTINGS.GLOW_CORNER_Y,
+        { fill: Colors.noteColorProperty, opacity: ORBITAL_BOARD_NODE_SETTINGS.GLOW_OPACITY },
+      );
       highlights.addChild(glow);
       const onHighlight = (subshell: number | null) => {
         const bounds = subshell === null ? undefined : groupBounds[subshell];
         glow.visible = bounds !== undefined;
         if (bounds) {
-          glow.setRectBounds(bounds.dilatedXY(7, 6));
+          glow.setRectBounds(
+            bounds.dilatedXY(
+              ORBITAL_BOARD_NODE_SETTINGS.ON_HIGHLIGHT_X_DILATION,
+              ORBITAL_BOARD_NODE_SETTINGS.ON_HIGHLIGHT_Y_DILATION,
+            ),
+          );
         }
       };
       highlightProperty.link(onHighlight);
@@ -339,11 +385,19 @@ export class OrbitalBoardNode extends Node {
       box.mutate({ tagName: "button", focusable: true, accessibleName: name });
       if (options.selectedProperty) {
         const selected = options.selectedProperty;
-        const outline = new Rectangle(-3, -3, BOX_WIDTH + 6, BOX_HEIGHT + 6, 6, 6, {
-          stroke: Colors.accentColorProperty,
-          lineWidth: 2,
-          pickable: false,
-        });
+        const outline = new Rectangle(
+          ORBITAL_BOARD_NODE_SETTINGS.OUTLINE_X,
+          ORBITAL_BOARD_NODE_SETTINGS.OUTLINE_Y,
+          BOX_WIDTH + 6,
+          BOX_HEIGHT + 6,
+          ORBITAL_BOARD_NODE_SETTINGS.OUTLINE_CORNER_X,
+          ORBITAL_BOARD_NODE_SETTINGS.OUTLINE_CORNER_Y,
+          {
+            stroke: Colors.accentColorProperty,
+            lineWidth: ORBITAL_BOARD_NODE_SETTINGS.OUTLINE_LINE_WIDTH,
+            pickable: false,
+          },
+        );
         box.addChild(outline);
         const onSelected = (i: number) => {
           outline.visible = i === index;
@@ -373,7 +427,7 @@ export class OrbitalBoardNode extends Node {
             if (spin !== null) {
               dragged = true;
               this.beginCarry(spin, point);
-              (spin === 1 ? box.up : box.down).opacity = 0.3;
+              (spin === 1 ? box.up : box.down).opacity = ORBITAL_BOARD_NODE_SETTINGS.OPACITY_OPACITY;
             }
           }
           if (dragged) {
@@ -478,15 +532,20 @@ export class OrbitalBoardNode extends Node {
       const node = new Node({
         cursor: "pointer",
         children: [
-          new Circle(17, {
+          new Circle(ORBITAL_BOARD_NODE_SETTINGS.NODE_RADIUS, {
             fill: Colors.controlSurfaceColorProperty,
             stroke: Colors.accentColorProperty,
-            lineWidth: 2,
+            lineWidth: ORBITAL_BOARD_NODE_SETTINGS.NODE_LINE_WIDTH,
           }),
           new Text(spin === 1 ? "↑" : "↓", {
             font: ARROW_FONT,
             fill: Colors.controlSurfaceTextColorProperty,
-            center: new Bounds2(-17, -17, 17, 17).center,
+            center: new Bounds2(
+              ORBITAL_BOARD_NODE_SETTINGS.NODE_MIN_X,
+              ORBITAL_BOARD_NODE_SETTINGS.NODE_MIN_Y,
+              ORBITAL_BOARD_NODE_SETTINGS.NODE_MAX_X,
+              ORBITAL_BOARD_NODE_SETTINGS.NODE_MAX_Y,
+            ).center,
           }),
         ],
       });
@@ -515,12 +574,12 @@ export class OrbitalBoardNode extends Node {
       return node;
     };
     const label = new Text(strings.common.trayStringProperty, {
-      font: new PhetFont(12),
+      font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.LABEL_FONT_SIZE),
       fill: Colors.textColorProperty,
-      maxWidth: 170,
+      maxWidth: ORBITAL_BOARD_NODE_SETTINGS.LABEL_MAX_WIDTH,
     });
     const tray = new VBox({
-      spacing: 6,
+      spacing: ORBITAL_BOARD_NODE_SETTINGS.TRAY_SPACING,
       align: "left",
       children: [label, new Node({ children: [token(1), token(2)] })],
     });
@@ -528,7 +587,7 @@ export class OrbitalBoardNode extends Node {
     if (tokens) {
       const [a, b] = tokens.children;
       if (a && b) {
-        b.left = a.right + 14;
+        b.left = a.right + ORBITAL_BOARD_NODE_SETTINGS.CREATE_SPIN_TRAY_LEFT_OFFSET;
       }
     }
     const onEditable = (on: boolean) => {
@@ -554,7 +613,7 @@ export class OrbitalBoardNode extends Node {
         box &&
         position &&
         new Bounds2(position.x, position.y, position.x + BOX_WIDTH, position.y + BOX_HEIGHT)
-          .dilated(4)
+          .dilated(ORBITAL_BOARD_NODE_SETTINGS.DILATED_DILATION)
           .containsPoint(point)
       ) {
         return box.index;
@@ -573,13 +632,21 @@ export class OrbitalBoardNode extends Node {
     if (!(box && position)) {
       return;
     }
-    const flash = new Rectangle(0, 0, BOX_WIDTH, BOX_HEIGHT, 4, 4, {
-      fill: Colors.faultColorProperty,
-      pickable: false,
-    });
+    const flash = new Rectangle(
+      0,
+      0,
+      BOX_WIDTH,
+      BOX_HEIGHT,
+      ORBITAL_BOARD_NODE_SETTINGS.FLASH_CORNER_X,
+      ORBITAL_BOARD_NODE_SETTINGS.FLASH_CORNER_Y,
+      {
+        fill: Colors.faultColorProperty,
+        pickable: false,
+      },
+    );
     box.addChild(flash);
     this.animate(box, SHAKE_TIME, (f) => {
-      box.x = position.x + 5 * Math.sin(f * Math.PI * 6) * (1 - f);
+      box.x = position.x + ORBITAL_BOARD_NODE_SETTINGS.SHAKE_X_FACTOR * Math.sin(f * Math.PI * 6) * (1 - f);
       flash.opacity = 0.6 * (1 - f);
       if (f >= 1) {
         box.removeChild(flash);
@@ -602,11 +669,19 @@ export class OrbitalBoardNode extends Node {
     const to = out ? this.trayCenter : boxCenter;
     const token = new Node({
       children: [
-        new Circle(12, { fill: Colors.electronColorProperty, opacity: 0.35 }),
+        new Circle(ORBITAL_BOARD_NODE_SETTINGS.TOKEN_RADIUS, {
+          fill: Colors.electronColorProperty,
+          opacity: ORBITAL_BOARD_NODE_SETTINGS.TOKEN_OPACITY,
+        }),
         new Text(spin === 1 ? "↑" : "↓", {
           font: ARROW_FONT,
           fill: Colors.electronColorProperty,
-          center: new Bounds2(-12, -12, 12, 12).center,
+          center: new Bounds2(
+            ORBITAL_BOARD_NODE_SETTINGS.TOKEN_MIN_X,
+            ORBITAL_BOARD_NODE_SETTINGS.TOKEN_MIN_Y,
+            ORBITAL_BOARD_NODE_SETTINGS.TOKEN_MAX_X,
+            ORBITAL_BOARD_NODE_SETTINGS.TOKEN_MAX_Y,
+          ).center,
         }),
       ],
     });

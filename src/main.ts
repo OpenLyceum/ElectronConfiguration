@@ -27,6 +27,7 @@ import { ComboBox } from "scenerystack/sun";
 import { Tandem } from "scenerystack/tandem";
 import { ConfigurationDetectiveScreen } from "./configuration-detective/ConfigurationDetectiveScreen.js";
 import ElectronConfigurationColors from "./ElectronConfigurationColors.js";
+import { MAIN_SETTINGS } from "./ElectronConfigurationConstants.js";
 import { FillTheOrbitalsScreen } from "./fill-orbitals/FillTheOrbitalsScreen.js";
 import { StringManager } from "./i18n/StringManager.js";
 import { MakeAnIonScreen } from "./ions/MakeAnIonScreen.js";
@@ -131,9 +132,9 @@ onReadyToLaunch(() => {
           value,
           createNode: () =>
             new RichText(value.nameProperty, {
-              font: new PhetFont(15),
+              font: new PhetFont(MAIN_SETTINGS.SELECTOR_FONT_SIZE),
               fill: ElectronConfigurationColors.controlSurfaceTextColorProperty,
-              maxWidth: 280,
+              maxWidth: MAIN_SETTINGS.SELECTOR_MAX_WIDTH,
             }),
         })),
         screen.view,
