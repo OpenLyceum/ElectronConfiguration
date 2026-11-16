@@ -17,7 +17,7 @@ const scaleToFit = (node: Node, width: number, height: number) =>
   node.setScaleMagnitude(Math.min(1, width / node.width, height / node.height));
 
 /** Make an Ion: one electron leaves for (or arrives from) the surroundings, animated per orbital. */
-export const stepIon = (model: ConfigurationModel, board: OrbitalBoardNode, direction: -1 | 1): void => {
+const stepIon = (model: ConfigurationModel, board: OrbitalBoardNode, direction: -1 | 1): void => {
   const before = model.diagramProperty.value;
   model.moveIon(direction);
   const after = model.diagramProperty.value;

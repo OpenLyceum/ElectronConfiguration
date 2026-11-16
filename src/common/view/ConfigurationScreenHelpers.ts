@@ -9,15 +9,15 @@ import type { OrbitalBoardNode } from "./OrbitalBoardNode.js";
 
 type HighlightProperty = TReadOnlyProperty<number | null>;
 
-export type TextFactory = (value: string | TReadOnlyProperty<string>, width?: number, size?: number) => RichText;
+type TextFactory = (value: string | TReadOnlyProperty<string>, width?: number, size?: number) => RichText;
 
-export type ButtonFactory = (
+type ButtonFactory = (
   label: TReadOnlyProperty<string>,
   action: () => void,
   baseColor?: TPaint,
 ) => RectangularPushButton;
 
-export type SpinnerFactory = (
+type SpinnerFactory = (
   property: NumberProperty,
   name: TReadOnlyProperty<string>,
   format?: ((value: number) => string) | null,
