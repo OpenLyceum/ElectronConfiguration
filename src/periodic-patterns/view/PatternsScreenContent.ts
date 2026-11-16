@@ -40,7 +40,7 @@ const blockColors = {
 };
 
 /** The subshell an element is filling: the last one occupied in its filling-rule prediction. */
-export const fillingSubshell = (z: number): number => {
+const fillingSubshell = (z: number): number => {
   const counts = fillingPrediction(z);
   let last = 0;
   counts.forEach((c, i) => {
