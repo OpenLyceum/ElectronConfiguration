@@ -43,7 +43,7 @@ export const createIonsLeftControls = (model: ConfigurationModel, helpers: Confi
   };
   return [
     new HBox({
-      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.SPINNER_ROW_SPACING,
       children: [
         text(s.ionStringProperty, CONFIGURATION_SCREEN_VIEW_SETTINGS.ION_TEXT_WIDTH),
         spinner(model.ionIndexProperty, s.ionStringProperty, ionName),
@@ -128,12 +128,12 @@ class SurroundingsNode extends Node {
         stroke: Colors.panelBorderColorProperty,
         lineDash: [
           CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_LINE_DASH_DASH,
-          CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FRAME_LINE_DASH_DASH,
+          CONFIGURATION_SCREEN_VIEW_SETTINGS.FRAME_LINE_DASH_GAP,
         ],
       },
     );
     const label = new Text(s.surroundingsStringProperty, {
-      font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_FONT_SIZE_SEGMENT_3),
+      font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.SURROUNDINGS_LABEL_FONT_SIZE),
       fill: Colors.textColorProperty,
       maxWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_MAX_WIDTH,
     });

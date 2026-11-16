@@ -59,7 +59,7 @@ export class ConfigurationNode extends HBox {
       (counts, text) => `${text} ${configuration(counts, abbreviated)}`,
     );
     super({
-      spacing: CONFIGURATION_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: CONFIGURATION_NODE_SETTINGS.SPACING,
       align: "top", // A plain Node keeps the HBox from shrinking the FlowBox to its minimum (one chip per line).
       children: [label, new Node({ children: [chips] })],
       accessibleParagraph: paragraph,

@@ -106,8 +106,8 @@ class OrbitalBox extends Node {
     );
     this.up = new Text("↑", { font: ARROW_FONT, fill: Colors.controlSurfaceTextColorProperty });
     this.down = new Text("↓", { font: ARROW_FONT, fill: Colors.controlSurfaceTextColorProperty });
-    this.up.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.PLUS_XY_X_OFFSET, 0);
-    this.down.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.PLUS_XY_X_OFFSET_SEGMENT_2, 0);
+    this.up.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.UP_ARROW_X_OFFSET, 0);
+    this.down.center = background.center.plusXY(ORBITAL_BOARD_NODE_SETTINGS.DOWN_ARROW_X_OFFSET, 0);
     this.children = [background, this.up, this.down];
   }
   public show(bits: number): void {
@@ -180,7 +180,7 @@ export class OrbitalBoardNode extends Node {
         maxWidth: height * ORBITAL_BOARD_NODE_SETTINGS.AXIS_LABEL_MAX_WIDTH_FACTOR,
       });
       axisLabel.boundsProperty.link(() => {
-        axisLabel.right = AXIS_X - ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+        axisLabel.right = AXIS_X - ORBITAL_BOARD_NODE_SETTINGS.AXIS_LABEL_RIGHT_GAP;
         axisLabel.centerY = height / 2;
       });
       this.addChild(axis);
@@ -203,7 +203,7 @@ export class OrbitalBoardNode extends Node {
       groupBounds[subshell] = new Bounds2(x, y, x + width, y + BOX_HEIGHT + 6);
       groups.addChild(
         new Text(s.name, {
-          font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_FONT_SIZE),
+          font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.SUBSHELL_LABEL_FONT_SIZE),
           fill: Colors.textColorProperty,
           right: x - 5,
           centerY: y + BOX_HEIGHT / 2,
@@ -258,7 +258,7 @@ export class OrbitalBoardNode extends Node {
                     values[subshell] === "note"
                       ? [
                           ORBITAL_BOARD_NODE_SETTINGS.ON_MARKS_LINE_DASH_DASH,
-                          ORBITAL_BOARD_NODE_SETTINGS.CONSTRUCTOR_ON_MARKS_LINE_DASH_DASH,
+                          ORBITAL_BOARD_NODE_SETTINGS.ON_MARKS_LINE_DASH_GAP,
                         ]
                       : [],
                 },

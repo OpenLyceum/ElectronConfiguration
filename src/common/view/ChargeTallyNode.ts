@@ -71,7 +71,7 @@ export class ChargeTallyNode extends VBox {
     );
     super({
       align: "left",
-      spacing: CHARGE_TALLY_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: CHARGE_TALLY_NODE_SETTINGS.SPACING,
       children: [
         row(protonLabel, protonCount, protonSquares),
         row(electronLabel, electronCount, electronSquares),

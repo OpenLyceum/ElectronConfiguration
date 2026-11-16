@@ -11,7 +11,7 @@ export const createElementLeftControls = (model: ConfigurationModel, helpers: Co
   const s = StringManager.getInstance().getStrings().common;
   return [
     new HBox({
-      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.SPINNER_ROW_SPACING,
       children: [
         helpers.text(s.elementStringProperty, CONFIGURATION_SCREEN_VIEW_SETTINGS.ELEMENT_TEXT_WIDTH),
         helpers.spinner(model.zProperty, s.elementStringProperty),

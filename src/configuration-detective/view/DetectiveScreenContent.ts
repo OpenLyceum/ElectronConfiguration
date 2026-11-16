@@ -61,7 +61,7 @@ export const createDetectiveScreenContent = (
               fill: Colors.controlSurfaceTextColorProperty,
             }),
             new RichText(name, {
-              font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_FONT_SIZE_SEGMENT_2),
+              font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICE_LABEL_FONT_SIZE),
               fill: Colors.controlSurfaceTextColorProperty,
               lineWrap: CONFIGURATION_SCREEN_VIEW_SETTINGS.LABEL_LINE_WRAP,
             }),
@@ -85,7 +85,7 @@ export const createDetectiveScreenContent = (
       choices.children = (c?.options ?? []).map((z) =>
         tile(
           new VBox({
-            spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICES_SPACING_VARIANT_2,
+            spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICE_TILE_SPACING,
             children: [
               new Text(String(z), {
                 font: new PhetFont(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHOICES_FONT_SIZE),
@@ -162,7 +162,7 @@ export const createDetectiveScreenContent = (
       align: "left",
       spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_DETECTIVE_SPACING,
       excludeInvisibleChildrenFromBounds: true,
-      children: [text(prompt, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE_SEGMENT_3), choices],
+      children: [text(prompt, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.PROMPT_TEXT_SIZE), choices],
     }),
     progressRow,
   ];

@@ -40,11 +40,11 @@ export class ElectronConfigurationPreferencesNode extends VBox {
     );
     super({
       align: "left",
-      spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.SPACING,
       children: [
         new Text(strings.titleStringProperty, {
           font: new PhetFont({
-            size: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_FONT_SIZE,
+            size: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.TITLE_FONT_SIZE,
             weight: "bold",
           }),
           fill: ElectronConfigurationColors.controlSurfaceTextColorProperty,
@@ -54,7 +54,7 @@ export class ElectronConfigurationPreferencesNode extends VBox {
           spacing: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.ITEM_2_SPACING,
           children: [
             optionText(strings.tableExtentStringProperty),
-            new Node({ children: [extentRadio], x: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_X }),
+            new Node({ children: [extentRadio], x: ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS.RADIO_INDENT_X }),
           ],
         }),
         optionText(strings.noteStringProperty),

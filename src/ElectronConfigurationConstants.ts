@@ -73,7 +73,7 @@ export const CHARGE_TALLY_NODE_SETTINGS = {
   NET_TEXT_FONT_SIZE: 17,
   NET_TEXT_MAX_WIDTH: 360,
   ROW_SPACING: 8,
-  CONSTRUCTOR_SPACING: 6,
+  SPACING: 6,
 } as const;
 
 /** Settings for common/view/ConfigurationNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
@@ -85,7 +85,7 @@ export const CONFIGURATION_NODE_SETTINGS = {
   CHIPS_SPACING: 4,
   LABEL_FONT_SIZE: 13,
   LABEL_MAX_WIDTH: 140,
-  CONSTRUCTOR_SPACING: 8,
+  SPACING: 8,
 } as const;
 
 /** Settings for common/view/ConfigurationScreenView.ts. Layout lengths are in px; counts and ratios are dimensionless. */
@@ -109,27 +109,27 @@ export const CONFIGURATION_SCREEN_VIEW_SETTINGS = {
   LEGEND_FONT_SIZE: 12, // px
   EXCEPTION_TEXT_SIZE: 13, // px
   TEXT_SIZE: 14, // px
-  TEXT_SIZE_SEGMENT_2: 13, // px
-  LABEL_FONT_SIZE_SEGMENT_2: 13, // px
-  CHOICES_SPACING_VARIANT_2: 2, // px
+  CORE_TEXT_SIZE: 13, // px
+  CHOICE_LABEL_FONT_SIZE: 13, // px
+  CHOICE_TILE_SPACING: 2, // px
   CHOICES_FONT_SIZE: 11, // px
   STAR_OUTER_RADIUS: 10, // px
   STAR_INNER_RADIUS: 5, // px
-  TEXT_SIZE_SEGMENT_3: 15, // px
-  LABEL_FONT_SIZE_SEGMENT_3: 12, // px
+  PROMPT_TEXT_SIZE: 15, // px
+  SURROUNDINGS_LABEL_FONT_SIZE: 12, // px
   DOTS_RADIUS: 5, // px
 
   INFO_BUTTON_LINE_WRAP: 560, // px
   INFO_BUTTON_SIZE: 20, // px
-  CONSTRUCTOR_ACTIONS_SPACING: 8, // px
-  CONSTRUCTOR_COMMON_INFO_SPACING: 20, // px
+  ACTION_ROW_SPACING: 8, // px
+  DETAILS_SHELLS_ROW_SPACING: 20, // px
   BUILD_TABLE_LEFT_FACTOR: 26, // dimensionless
   BUILD_TABLE_SPACING: 5, // px
   LABEL_LINE_WRAP: 130, // px
   CREATE_DETECTIVE_SIZE: 24, // px
   UPDATE_STARS_SPACING: 3, // px
   FRAME_LINE_DASH_DASH: 4, // px
-  CONSTRUCTOR_FRAME_LINE_DASH_DASH: 3, // px
+  FRAME_LINE_DASH_GAP: 3, // px
 
   RIGHT: 510,
   TEXT_WIDTH: 440,
@@ -143,7 +143,7 @@ export const CONFIGURATION_SCREEN_VIEW_SETTINGS = {
   INFO_BUTTON_FONT_SIZE: 15,
   TITLE_SPACING: 10,
   ACTIONS_SPACING: 6,
-  CONSTRUCTOR_SPACING: 12,
+  SPINNER_ROW_SPACING: 12,
   LEFT_SPACING: 8,
   LEFT_TOP: 14,
   CHILDREN_RADIUS: 11,
@@ -205,8 +205,8 @@ export const CONFIGURATION_SCREEN_VIEW_SETTINGS = {
 
 /** Settings for common/view/OrbitalBoardNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const ORBITAL_BOARD_NODE_SETTINGS = {
-  PLUS_XY_X_OFFSET: -6, // px
-  PLUS_XY_X_OFFSET_SEGMENT_2: 6, // px
+  UP_ARROW_X_OFFSET: -6, // px
+  DOWN_ARROW_X_OFFSET: 6, // px
   MARKS_X_DILATION: 5, // px
   MARKS_Y_DILATION: 4, // px
   ON_HIGHLIGHT_X_DILATION: 7, // px
@@ -216,9 +216,9 @@ export const ORBITAL_BOARD_NODE_SETTINGS = {
   SHOW_CENTER_X_FACTOR: 3, // dimensionless
   SHOW_CENTER_X_OFFSET: 6, // px
   AXIS_LABEL_MAX_WIDTH_FACTOR: 0.6, // dimensionless
-  CONSTRUCTOR_RIGHT_OFFSET: 4, // px
+  AXIS_LABEL_RIGHT_GAP: 4, // px
   ON_MARKS_LINE_DASH_DASH: 6, // px
-  CONSTRUCTOR_ON_MARKS_LINE_DASH_DASH: 4, // px
+  ON_MARKS_LINE_DASH_GAP: 4, // px
   CREATE_SPIN_TRAY_LEFT_OFFSET: 14, // px
   SHAKE_X_FACTOR: 5, // dimensionless
 
@@ -245,7 +245,7 @@ export const ORBITAL_BOARD_NODE_SETTINGS = {
   AXIS_HEAD_WIDTH: 9,
   AXIS_TAIL_WIDTH: 2,
   AXIS_LABEL_FONT_SIZE: 11,
-  CONSTRUCTOR_FONT_SIZE: 13,
+  SUBSHELL_LABEL_FONT_SIZE: 13,
   TRACK_HEIGHT: 3,
   FILL_HEIGHT: 3,
   CHILDREN_Y: 6,
@@ -314,7 +314,7 @@ export const SHELL_NODE_SETTINGS = {
   MAX_N: 7,
   DEFAULT_MAX_N: 5,
   CAPTION_FONT_SIZE: 10,
-  CONSTRUCTOR_SPACING: 4,
+  SPACING: 4,
   MULTILINK_LINE_WIDTH: 1.5,
   MULTILINK_FONT_SIZE: 9,
 } as const;
@@ -327,9 +327,9 @@ export const ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS = {
   OPTION_TEXT_MAX_WIDTH: 430,
   EXTENT_RADIO_SPACING: 6,
   EXTENT_RADIO_RADIUS: 7,
-  CONSTRUCTOR_SPACING: 12,
-  CONSTRUCTOR_FONT_SIZE: 18,
-  CONSTRUCTOR_X: 10,
+  SPACING: 12,
+  TITLE_FONT_SIZE: 18,
+  RADIO_INDENT_X: 10,
 } as const;
 
 /** Defaults for public query parameters `z` and `maxZ`. */

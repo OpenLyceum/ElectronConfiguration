@@ -279,11 +279,11 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
       spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.ACTIONS_SPACING,
       children: [
         new HBox({
-          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_ACTIONS_SPACING,
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.ACTION_ROW_SPACING,
           children: actionButtons.slice(0, 3),
         }),
         new HBox({
-          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_ACTIONS_SPACING,
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.ACTION_ROW_SPACING,
           children: actionButtons.slice(3),
         }),
       ],
@@ -373,7 +373,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         statusNode,
         ...(showChips ? [fullNode, shortNode] : []),
         new HBox({
-          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_COMMON_INFO_SPACING,
+          spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.DETAILS_SHELLS_ROW_SPACING,
           children: [detailsControl, shellsControl],
         }),
       ],

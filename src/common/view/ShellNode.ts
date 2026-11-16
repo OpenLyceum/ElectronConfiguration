@@ -58,7 +58,7 @@ export class ShellNode extends VBox {
           .join(", ")}`,
     );
     super({
-      spacing: SHELL_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: SHELL_NODE_SETTINGS.SPACING,
       children: [atom, caption],
       accessibleParagraph: paragraph,
     });

@@ -225,7 +225,7 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
         exception,
       ],
     }),
-    text(core, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE_SEGMENT_2),
+    text(core, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.CORE_TEXT_SIZE),
   ];
 };
 
