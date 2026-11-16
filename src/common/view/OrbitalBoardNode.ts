@@ -37,8 +37,7 @@ const BOX_HEIGHT: number = ORBITAL_BOARD_NODE_SETTINGS.BOX_HEIGHT;
 const BOX_SPACING: number = ORBITAL_BOARD_NODE_SETTINGS.BOX_SPACING;
 const LEVEL_HEIGHT: number = ORBITAL_BOARD_NODE_SETTINGS.LEVEL_HEIGHT;
 const AXIS_X: number = ORBITAL_BOARD_NODE_SETTINGS.AXIS_X;
-/** Left edge of the s, p, d and f columns. */
-const COLUMN_X = [44, 112, 236, 448];
+const COLUMN_X = ORBITAL_BOARD_NODE_SETTINGS.COLUMN_X;
 const columnWidth = (l: number) => (2 * l + 1) * (BOX_WIDTH + BOX_SPACING) - BOX_SPACING;
 const ARROW_FONT = new PhetFont({ size: ORBITAL_BOARD_NODE_SETTINGS.ARROW_FONT_SIZE, weight: "bold" });
 const DRAG_THRESHOLD: number = ORBITAL_BOARD_NODE_SETTINGS.DRAG_THRESHOLD;
@@ -427,7 +426,7 @@ export class OrbitalBoardNode extends Node {
             if (spin !== null) {
               dragged = true;
               this.beginCarry(spin, point);
-              (spin === 1 ? box.up : box.down).opacity = ORBITAL_BOARD_NODE_SETTINGS.OPACITY_OPACITY;
+              (spin === 1 ? box.up : box.down).opacity = ORBITAL_BOARD_NODE_SETTINGS.DRAG_PREVIEW_OPACITY;
             }
           }
           if (dragged) {

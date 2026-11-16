@@ -194,6 +194,13 @@ export const CONFIGURATION_SCREEN_VIEW_SETTINGS = {
   LABEL_MAX_WIDTH: 90,
   ROW_SPACING: 8,
   LEFT_LEFT: 8,
+  /** Largest board size (width, height) per screen kind before scale-to-fit (px). */
+  BOARD_AREA: {
+    fill: [470, 400],
+    patterns: [470, 440],
+    ions: [470, 380],
+    detective: [470, 420],
+  },
 } as const;
 
 /** Settings for common/view/OrbitalBoardNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
@@ -221,13 +228,15 @@ export const ORBITAL_BOARD_NODE_SETTINGS = {
   LEVEL_HEIGHT: 38,
   AXIS_X: 8,
   ARROW_FONT_SIZE: 20,
-  /** Left edge of the s, p, d and f columns. */
+  /** Left edge of the s, p, d and f columns (px). */
+  COLUMN_X: [44, 112, 236, 448],
+  /** Pointer move (px) before a press counts as a drag. */
   DRAG_THRESHOLD: 6,
-  /** Left edge of the s, p, d and f columns. */
+  /** Duration of the Pauli-violation shake animation (s). */
   SHAKE_TIME: 0.4,
-  /** Left edge of the s, p, d and f columns. */
+  /** Duration of the arrow pop animation (s). */
   POP_TIME: 0.25,
-  /** Left edge of the s, p, d and f columns. */
+  /** Duration of the electron fly-to-box animation (s). */
   FLY_TIME: 0.55,
   BACKGROUND_CORNER_X: 4,
   BACKGROUND_CORNER_Y: 4,
@@ -251,7 +260,8 @@ export const ORBITAL_BOARD_NODE_SETTINGS = {
   OUTLINE_CORNER_X: 6,
   OUTLINE_CORNER_Y: 6,
   OUTLINE_LINE_WIDTH: 2,
-  OPACITY_OPACITY: 0.3,
+  /** Opacity of the orbital box while its electron is being dragged (dimensionless). */
+  DRAG_PREVIEW_OPACITY: 0.3,
   NODE_RADIUS: 17,
   NODE_LINE_WIDTH: 2,
   NODE_MIN_X: -17,
@@ -322,10 +332,12 @@ export const ELECTRON_CONFIGURATION_PREFERENCES_NODE_SETTINGS = {
   CONSTRUCTOR_X: 10,
 } as const;
 
-/** Component dimensions in px; ratios and control steps are dimensionless; precision counts digits. */
+/** Defaults for public query parameters `z` and `maxZ`. */
 export const ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS = {
-  DEFAULT_VALUE: 6, // dimensionless
-  DEFAULT_VALUE_VARIANT_2: 86, // dimensionless
+  /** Starting atomic number on Fill the Orbitals and Patterns in the Table. */
+  DEFAULT_Z: 6,
+  /** Default last element offered (Rn). */
+  DEFAULT_MAX_Z: 86,
 } as const;
 
 /** Component dimensions in px; ratios and control steps are dimensionless; precision counts digits. */

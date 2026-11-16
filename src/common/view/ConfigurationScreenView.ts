@@ -63,8 +63,6 @@ const blockColors = {
   d: Colors.dBlockColorProperty,
   f: Colors.fBlockColorProperty,
 };
-/** Largest size each screen's main orbital diagram may take; bigger tables scale the diagram down to fit. */
-const BOARD_AREA = { fill: [470, 400], patterns: [470, 440], ions: [470, 380], detective: [470, 420] } as const;
 const scaleToFit = (node: Node, width: number, height: number) =>
   node.setScaleMagnitude(Math.min(1, width / node.width, height / node.height));
 
@@ -276,7 +274,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
         trayNode: model.kind === "ions" ? new SurroundingsNode(model.chargeProperty) : null,
         insetNode: shells,
       });
-      const [width, height] = BOARD_AREA[model.kind];
+      const [width, height] = CONFIGURATION_SCREEN_VIEW_SETTINGS.BOARD_AREA[model.kind];
       scaleToFit(board, width, height);
       boardSlot.children = [board];
       this.boards.push(board);

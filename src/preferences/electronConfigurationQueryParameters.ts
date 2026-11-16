@@ -10,14 +10,14 @@ export default QueryStringMachine.getAll({
   /** Starting element on Fill the Orbitals and Patterns in the Table (clamped to `maxZ`). */
   z: {
     type: "number",
-    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_VALUE,
+    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_Z,
     public: true,
     isValidValue: (value: number) => Number.isInteger(value) && value >= 1 && value <= 86,
   },
   /** Last element offered: 36 (through Kr), 54 (through Xe) or 86 (through Rn, the default). */
   maxZ: {
     type: "number",
-    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_VALUE_VARIANT_2,
+    defaultValue: ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS.DEFAULT_MAX_Z,
     validValues: [36, 54, 86],
     public: true,
   },
