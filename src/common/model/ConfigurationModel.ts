@@ -57,7 +57,8 @@ export class ConfigurationModel {
   public readonly tableExtentProperty: TReadOnlyProperty<TableExtent>;
   public readonly zProperty = new NumberProperty(query.z, { range: new Range(MIN_Z, MAX_Z), numberType: "Integer" });
   public readonly chargeProperty = new NumberProperty(0);
-  public readonly diagramProperty = new Property<Diagram>(emptyDiagram());
+  private readonly _diagramProperty = new Property<Diagram>(emptyDiagram());
+  public readonly diagramProperty: TReadOnlyProperty<Diagram> = this._diagramProperty;
   public readonly selectedProperty = new NumberProperty(0, {
     range: new Range(0, ORBITALS.length - 1),
     numberType: "Integer",
@@ -74,11 +75,13 @@ export class ConfigurationModel {
   public readonly messageProperty = new StringUnionProperty<Message>("ready", { validValues: MESSAGES });
   public readonly countProperty = new DerivedProperty([this.diagramProperty], electronCount);
   /** Per-subshell feedback drawn on the diagram after Check (and the Cr/Cu note on Patterns). */
-  public readonly marksProperty = new Property<readonly SubshellMark[]>(noMarks());
+  private readonly _marksProperty = new Property<readonly SubshellMark[]>(noMarks());
+  public readonly marksProperty: TReadOnlyProperty<readonly SubshellMark[]> = this._marksProperty;
   /** Fires with the orbital index when Pauli blocks an electron, so the view can shake that box. */
   public readonly pauliEmitter = new Emitter<[number]>({ parameters: [{ valueType: "number" }] });
   /** Detective: which challenges have been solved without revealing the answer. */
-  public readonly solvedProperty = new Property<readonly boolean[]>(CHALLENGES.map(() => false));
+  private readonly _solvedProperty = new Property<readonly boolean[]>(CHALLENGES.map(() => false));
+  public readonly solvedProperty: TReadOnlyProperty<readonly boolean[]> = this._solvedProperty;
   /** Patterns: step through the table automatically. */
   public readonly autoplayProperty = new BooleanProperty(false);
   /** Detective: true while an identify challenge hides the element, so no view may show Z or its symbol. */
@@ -99,14 +102,14 @@ export class ConfigurationModel {
       if (kind === "patterns") {
         this.chargeProperty.value = 0;
         this.clearHistory();
-        this.diagramProperty.value = referenceDiagram(this.zProperty.value);
-        this.marksProperty.value = exceptionMarks(this.zProperty.value);
+        this._diagramProperty.value = referenceDiagram(this.zProperty.value);
+        this._marksProperty.value = exceptionMarks(this.zProperty.value);
       } else if (kind === "fill") {
         // Changing the target keeps the student's diagram (and undo history), so they can build C, then step
         // Z up to N and add one more electron — walking the table one element at a time. Check marks were
         // graded against the old target, so they go.
         this.messageProperty.value = "ready";
-        this.marksProperty.value = noMarks();
+        this._marksProperty.value = noMarks();
       }
     });
     this.ionIndexProperty.lazyLink(() => {
@@ -152,7 +155,7 @@ export class ConfigurationModel {
       subshellCounts(this.diagramProperty.value).some((c, i) => c > 0 && i >= extent.levels)
     ) {
       this.clearHistory();
-      this.diagramProperty.value = emptyDiagram();
+      this._diagramProperty.value = emptyDiagram();
     }
   }
   public get challenge() {
@@ -161,7 +164,7 @@ export class ConfigurationModel {
   private clearHistory(): void {
     this.history = [];
     this.messageProperty.value = "ready";
-    this.marksProperty.value = noMarks();
+    this._marksProperty.value = noMarks();
   }
   private initialize(): void {
     if (this.kind === "ions") {
@@ -169,10 +172,10 @@ export class ConfigurationModel {
     } else if (this.kind === "detective") {
       this.loadChallenge();
     } else if (this.kind === "patterns") {
-      this.diagramProperty.value = referenceDiagram(this.zProperty.value);
-      this.marksProperty.value = exceptionMarks(this.zProperty.value);
+      this._diagramProperty.value = referenceDiagram(this.zProperty.value);
+      this._marksProperty.value = exceptionMarks(this.zProperty.value);
     } else {
-      this.diagramProperty.value = emptyDiagram();
+      this._diagramProperty.value = emptyDiagram();
     }
   }
   private loadIon(): void {
@@ -180,7 +183,7 @@ export class ConfigurationModel {
     if (ion) {
       this.zProperty.value = ion.z;
       this.chargeProperty.value = 0;
-      this.diagramProperty.value = referenceDiagram(ion.z);
+      this._diagramProperty.value = referenceDiagram(ion.z);
       this.clearHistory();
     }
   }
@@ -191,7 +194,7 @@ export class ConfigurationModel {
     }
     this.zProperty.value = c.z;
     this.chargeProperty.value = c.q;
-    this.diagramProperty.value = challengeDiagram(c);
+    this._diagramProperty.value = challengeDiagram(c);
     this.revealed = false;
     this.clearHistory();
   }
@@ -256,17 +259,17 @@ export class ConfigurationModel {
   private commit(next: Diagram, message: Message = "ready"): void {
     if (!sameDiagram(next, this.diagramProperty.value)) {
       this.history.push(this.diagramProperty.value);
-      this.diagramProperty.value = next;
-      this.marksProperty.value = noMarks();
+      this._diagramProperty.value = next;
+      this._marksProperty.value = noMarks();
     }
     this.messageProperty.value = message;
   }
   public undo(): void {
     const previous = this.history.pop();
     if (previous) {
-      this.diagramProperty.value = previous;
+      this._diagramProperty.value = previous;
       this.messageProperty.value = "ready";
-      this.marksProperty.value = noMarks();
+      this._marksProperty.value = noMarks();
     }
   }
   public clear(): void {
@@ -290,7 +293,7 @@ export class ConfigurationModel {
       q = this.chargeProperty.value,
       result = assess(this.diagramProperty.value, z, q);
     this.messageProperty.value = result;
-    this.marksProperty.value = subshellMarks(this.diagramProperty.value, z, q);
+    this._marksProperty.value = subshellMarks(this.diagramProperty.value, z, q);
     if (this.kind === "detective" && result === "ground" && !this.revealed) {
       this.markSolved();
     }
@@ -298,7 +301,7 @@ export class ConfigurationModel {
   private markSolved(): void {
     const solved = this.solvedProperty.value.slice();
     solved[this.challengeIndexProperty.value] = true;
-    this.solvedProperty.value = solved;
+    this._solvedProperty.value = solved;
   }
   public moveIon(direction: -1 | 1): void {
     const ion = IONS[this.ionIndexProperty.value];
@@ -311,7 +314,7 @@ export class ConfigurationModel {
       return;
     }
     this.chargeProperty.value = next;
-    this.diagramProperty.value = referenceDiagram(ion.z, next);
+    this._diagramProperty.value = referenceDiagram(ion.z, next);
     this.messageProperty.value = next === ion.q ? "correct" : "ready";
   }
   public answer(value: number): void {
@@ -340,7 +343,7 @@ export class ConfigurationModel {
     this.detailsProperty.reset();
     this.ionIndexProperty.reset();
     this.challengeIndexProperty.reset();
-    this.solvedProperty.reset();
+    this._solvedProperty.reset();
     this.autoplayProperty.reset();
     this.clearHistory();
     // Resetting restores the full initial ranges; narrow them again to the current extent.
@@ -368,15 +371,15 @@ export class ConfigurationModel {
     this.identityHiddenProperty.dispose();
     this.zProperty.dispose();
     this.chargeProperty.dispose();
-    this.diagramProperty.dispose();
+    this._diagramProperty.dispose();
     this.selectedProperty.dispose();
     this.detailsProperty.dispose();
     this.ionIndexProperty.dispose();
     this.challengeIndexProperty.dispose();
     this.messageProperty.dispose();
-    this.marksProperty.dispose();
+    this._marksProperty.dispose();
     this.pauliEmitter.dispose();
-    this.solvedProperty.dispose();
+    this._solvedProperty.dispose();
     this.autoplayProperty.dispose();
     this.disposeExtent();
   }
