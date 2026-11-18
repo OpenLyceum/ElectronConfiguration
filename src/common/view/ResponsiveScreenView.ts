@@ -78,6 +78,8 @@ export class ResponsiveScreenView extends ScreenView {
     });
     this.column.addInputListener({ focusin: (event) => this.reveal(event) });
     let previousY = 0;
+    // Pointer-only: a touch swipe that scrolls the portrait column. Keyboard users scroll by moving
+    // focus; the focusin listener above reveals the focused control.
     this.swipe = new DragListener({
       canStartPress: (event) => this.portraitProperty.value && event !== null && event.pointer.type === "touch",
       start: (event) => {
