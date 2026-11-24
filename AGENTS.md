@@ -40,3 +40,7 @@ Run `npm run lint && npm run check && npm run build && npm test`, then `npm run 
 - **Rename/scaffold scripts removed:** one-shot template generator scripts and their generator tests are gone after bootstrap.
 - **Preferences:** custom preferences model holds only the table extent; standard Visual and Localization preferences provide projector mode and language.
 - **Screen summaries:** shared `ConfigurationSummary` (extends `ScreenSummaryContent`) constructed in `ConfigurationScreenView`, not per-screen `*ScreenSummaryContent.ts` stubs.
+
+## Accessibility
+
+Follow [Baton/ACCESSIBILITY.md](https://github.com/OpenLyceum/Baton/blob/main/ACCESSIBILITY.md): PDOM names, per-screen `*ScreenSummaryContent`, and keyboard-help content. Document any intentional deviations under Compliance carve-outs.
