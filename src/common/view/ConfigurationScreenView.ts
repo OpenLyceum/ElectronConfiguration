@@ -181,7 +181,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     });
 
     // ── Target line ─────────────────────────────────────────────────────────
-    const target = new DerivedProperty(
+    const targetProperty = new DerivedProperty(
       [
         model.zProperty,
         model.chargeProperty,
@@ -212,7 +212,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     // The diagram is rebuilt when the table extent changes: more subshells (and an f column) through Rn.
     // Detective challenges all sit within H–Kr, so its diagram keeps the krypton layout.
     // The +Z nucleus label would give away an identify challenge.
-    const nucleusZ = new DerivedProperty([model.zProperty, model.identityHiddenProperty], (z, hidden) =>
+    const nucleusZProperty = new DerivedProperty([model.zProperty, model.identityHiddenProperty], (z, hidden) =>
       hidden ? null : z,
     );
     const boardSlot = new Node();
@@ -229,7 +229,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
             : extent.levels - 1;
       const shells = new ShellNode(
         model.diagramProperty,
-        nucleusZ,
+        nucleusZProperty,
         Math.max(...SUBSHELLS.slice(0, levels).map((sub) => sub.n)),
       );
       shells.visibleProperty = showShellsProperty;
@@ -293,7 +293,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     const leftChildren: Node[] = [
       title,
       ...(parts.createLeftControls?.(model, helpers) ?? []),
-      text(target, TEXT_WIDTH),
+      text(targetProperty, TEXT_WIDTH),
       boardSlot,
       selectedNode,
       actions,

@@ -2,7 +2,7 @@
  * ChargeTallyNode — Make an Ion's proton and electron tallies, one square per particle.
  *
  * Protons stay fixed; electron squares are filled for electrons present, hollow for electrons a cation has
- * lost, and extra squares appear for electrons an anion has gained. The net charge is the visible difference.
+ * lost, and extra squares appear for electrons an anion has gained. The netProperty charge is the visible difference.
  */
 import { DerivedProperty, Multilink, type TReadOnlyProperty } from "scenerystack/axon";
 import { StringUtils } from "scenerystack/phetcommon";
@@ -51,11 +51,11 @@ export class ChargeTallyNode extends VBox {
     const electronCount = new Text("", labelOptions);
     const protonSquares = new Node();
     const electronSquares = new Node();
-    const net = new DerivedProperty(
+    const netProperty = new DerivedProperty(
       [zProperty, chargeProperty, s.netChargeStringProperty],
       (z, q, pattern) => `${StringUtils.fillIn(pattern, { charge: formatCharge(q) })} → ${species(z, q)}`,
     );
-    const netText = new Text(net, {
+    const netText = new Text(netProperty, {
       font: new PhetFont({ size: CHARGE_TALLY_NODE_SETTINGS.NET_TEXT_FONT_SIZE, weight: "bold" }),
       fill: Colors.textColorProperty,
       maxWidth: CHARGE_TALLY_NODE_SETTINGS.NET_TEXT_MAX_WIDTH,
@@ -65,8 +65,8 @@ export class ChargeTallyNode extends VBox {
         spacing: CHARGE_TALLY_NODE_SETTINGS.ROW_SPACING,
         children: [new Node({ children: [label] }), new Node({ children: [count] }), squares],
       });
-    const paragraph = new DerivedProperty(
-      [zProperty, chargeProperty, s.protonsStringProperty, s.electronsStringProperty, net],
+    const paragraphProperty = new DerivedProperty(
+      [zProperty, chargeProperty, s.protonsStringProperty, s.electronsStringProperty, netProperty],
       (z, q, protons, electrons, netString) => `${protons} ${z}, ${electrons} ${z - q}. ${netString}`,
     );
     super({
@@ -77,7 +77,7 @@ export class ChargeTallyNode extends VBox {
         row(electronLabel, electronCount, electronSquares),
         netText,
       ],
-      accessibleParagraph: paragraph,
+      accessibleParagraph: paragraphProperty,
     });
     // Align the squares into a column regardless of label lengths.
     const labelWidth = () => Math.max(protonLabel.width, electronLabel.width);
@@ -98,9 +98,9 @@ export class ChargeTallyNode extends VBox {
     });
     this.disposeChargeTally = () => {
       multilink.dispose();
-      paragraph.dispose();
+      paragraphProperty.dispose();
       netText.dispose();
-      net.dispose();
+      netProperty.dispose();
       protonLabel.dispose();
       electronLabel.dispose();
     };

@@ -103,15 +103,15 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
         }
       };
       pick.addInputListener({ over: show, focus: show, out: clear, blur: clear });
-      const current = new DerivedProperty([model.zProperty], (value) => value === z);
-      owned.push(current);
+      const currentProperty = new DerivedProperty([model.zProperty], (value) => value === z);
+      owned.push(currentProperty);
       table.addChild(pick);
       table.addChild(
         new Rectangle(pick.bounds.dilated(CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_DILATION), {
           stroke: Colors.accentColorProperty,
           lineWidth: CONFIGURATION_SCREEN_VIEW_SETTINGS.BUILD_TABLE_LINE_WIDTH,
           pickable: false,
-          visibleProperty: current,
+          visibleProperty: currentProperty,
         }),
       );
     }
@@ -179,24 +179,24 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
       }),
     ],
   });
-  // The previewed element (hover/focus) or the current one.
-  const shownZ = new DerivedProperty([previewZProperty, model.zProperty], (preview, z) => preview ?? z);
-  const previewLabel = new DerivedProperty([shownZ, s.previewStringProperty], (z, pattern) =>
+  // The previewed element (hover/focus) or the currentProperty one.
+  const shownZProperty = new DerivedProperty([previewZProperty, model.zProperty], (preview, z) => preview ?? z);
+  const previewLabelProperty = new DerivedProperty([shownZProperty, s.previewStringProperty], (z, pattern) =>
     StringUtils.fillIn(pattern, { species: species(z), z, subshell: SUBSHELLS[fillingSubshell(z)]?.name ?? "" }),
   );
   const observed = new ConfigurationNode(
-    new DerivedProperty([shownZ], (z) => referenceCounts(z)),
+    new DerivedProperty([shownZProperty], (z) => referenceCounts(z)),
     true,
     s.observedStringProperty,
   );
   const predicted = new ConfigurationNode(
-    new DerivedProperty([shownZ], (z) => fillingPrediction(z)),
+    new DerivedProperty([shownZProperty], (z) => fillingPrediction(z)),
     true,
     s.predictedStringProperty,
   );
   const exception = text(s.exceptionStringProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.EXCEPTION_TEXT_SIZE);
-  exception.visibleProperty = new DerivedProperty([shownZ], isFillingException);
-  const core = new DerivedProperty([shownZ, s.coreStringProperty], (z, pattern) => {
+  exception.visibleProperty = new DerivedProperty([shownZProperty], isFillingException);
+  const coreProperty = new DerivedProperty([shownZProperty, s.coreStringProperty], (z, pattern) => {
     const counts = referenceCounts(z);
     let n = 0;
     counts.forEach((count, i) => {
@@ -205,7 +205,7 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
       }
     });
     const outer = counts.reduce((sum, c, i) => sum + ((SUBSHELLS[i]?.n ?? 0) === n ? c : 0), 0);
-    return StringUtils.fillIn(pattern, { core: z - outer, outer });
+    return StringUtils.fillIn(pattern, { coreProperty: z - outer, outer });
   });
   return [
     new VBox({
@@ -219,17 +219,17 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
       spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_PATTERNS_SPACING,
       excludeInvisibleChildrenFromBounds: true,
       children: [
-        text(previewLabel, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE),
+        text(previewLabelProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.TEXT_SIZE),
         observed,
         predicted,
         exception,
       ],
     }),
-    text(core, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.CORE_TEXT_SIZE),
+    text(coreProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.CORE_TEXT_SIZE),
   ];
 };
 
-/** Highlight property for the orbital board: subshell being filled under hover/current Z. */
+/** Highlight property for the orbital board: subshell being filled under hover/currentProperty Z. */
 export const createPatternsHighlightProperty = (
   previewZProperty: Property<number | null>,
   zProperty: ConfigurationModel["zProperty"],

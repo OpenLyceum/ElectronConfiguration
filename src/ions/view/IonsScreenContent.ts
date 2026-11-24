@@ -1,5 +1,5 @@
 /**
- * Make an Ion — left controls, surroundings tray, charge tally, and neutral comparison board.
+ * Make an Ion — left controls, surroundings tray, charge tally, and neutralProperty comparison board.
  */
 import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { Circle, HBox, Node, Rectangle, Text, VBox } from "scenerystack/scenery";
@@ -72,16 +72,16 @@ export const createIonsLeftControls = (model: ConfigurationModel, helpers: Confi
 /** Surroundings tray for the orbital board. */
 export const createIonsTrayNode = (model: ConfigurationModel): Node => new SurroundingsNode(model.chargeProperty);
 
-/** Right-column charge tally and neutral-atom comparison diagram. */
+/** Right-column charge tally and neutralProperty-atom comparison diagram. */
 export const createIonsScreenContent = (model: ConfigurationModel, _helpers: ConfigurationScreenHelpers): Node[] => {
   const s = StringManager.getInstance().getStrings().common;
-  const neutral = new DerivedProperty([model.zProperty], (z) => referenceDiagram(z));
+  const neutralProperty = new DerivedProperty([model.zProperty], (z) => referenceDiagram(z));
   const neutralSlot = new Node();
   model.tableExtentProperty.link((extent) => {
     for (const child of neutralSlot.children.slice()) {
       child.dispose();
     }
-    const neutralBoard = new OrbitalBoardNode(neutral, {
+    const neutralBoard = new OrbitalBoardNode(neutralProperty, {
       levels: extent.levels - 1,
       axis: false,
       interactive: false,

@@ -11,43 +11,46 @@ export function statusText(model: ConfigurationModel) {
   const strings = StringManager.getInstance().getStrings();
   // "ready" is the idle prompt; its wording depends on what the screen (or current challenge) asks for, so
   // screens without a Check button never invite the student to "check your prediction".
-  const key = new DerivedProperty([model.messageProperty, model.challengeIndexProperty], (message): StatusKey => {
-    if (message !== "ready") {
-      return message;
-    }
-    if (model.kind === "patterns") {
-      return "explore";
-    }
-    if (model.kind === "ions") {
-      return "ionReady";
-    }
-    const challenge = model.kind === "detective" ? model.challenge?.kind : undefined;
-    return challenge === "identify" || challenge === "isoelectronic" || challenge === "classify" ? "choose" : "ready";
-  });
-  const pattern = new DynamicProperty(key, {
-    derive: (k: typeof key.value) => strings.messages[`${k}StringProperty`],
+  const keyProperty = new DerivedProperty(
+    [model.messageProperty, model.challengeIndexProperty],
+    (message): StatusKey => {
+      if (message !== "ready") {
+        return message;
+      }
+      if (model.kind === "patterns") {
+        return "explore";
+      }
+      if (model.kind === "ions") {
+        return "ionReady";
+      }
+      const challenge = model.kind === "detective" ? model.challenge?.kind : undefined;
+      return challenge === "identify" || challenge === "isoelectronic" || challenge === "classify" ? "choose" : "ready";
+    },
+  );
+  const patternProperty = new DynamicProperty(keyProperty, {
+    derive: (k: typeof keyProperty.value) => strings.messages[`${k}StringProperty`],
   });
   const property = new DerivedProperty(
-    [pattern, model.countProperty, model.zProperty, model.chargeProperty],
+    [patternProperty, model.countProperty, model.zProperty, model.chargeProperty],
     (p, count, z, q) => StringUtils.fillIn(p, { target: z - q, count }),
   );
   return {
-    key: key as TReadOnlyProperty<StatusKey>,
+    keyProperty: keyProperty as TReadOnlyProperty<StatusKey>,
     property,
     dispose: () => {
       property.dispose();
-      pattern.dispose();
-      key.dispose();
+      patternProperty.dispose();
+      keyProperty.dispose();
     },
   };
 }
 export class ConfigurationSummary extends ScreenSummaryContent {
-  private readonly details: TReadOnlyProperty<string>;
+  private readonly detailsProperty: TReadOnlyProperty<string>;
   private readonly status: ReturnType<typeof statusText>;
   public constructor(model: ConfigurationModel) {
     const s = StringManager.getInstance().getStrings();
     const status = statusText(model);
-    const details = new DerivedProperty(
+    const detailsProperty = new DerivedProperty(
       [
         model.zProperty,
         model.chargeProperty,
@@ -58,9 +61,9 @@ export class ConfigurationSummary extends ScreenSummaryContent {
         s.common.unknownStringProperty,
         model.challengeIndexProperty,
       ],
-      (z, q, count, diagram, feedback, pattern, unknown) => {
+      (z, q, count, diagram, feedback, patternProperty, unknown) => {
         const hidden = model.kind === "detective" && model.challenge?.kind === "identify";
-        return StringUtils.fillIn(pattern, {
+        return StringUtils.fillIn(patternProperty, {
           species: hidden ? unknown : species(z, q),
           z: hidden ? "?" : z,
           charge: formatCharge(q),
@@ -73,10 +76,10 @@ export class ConfigurationSummary extends ScreenSummaryContent {
     super({
       playAreaContent: s.a11y.playStringProperty,
       controlAreaContent: s.a11y.controlsStringProperty,
-      currentDetailsContent: details,
+      currentDetailsContent: detailsProperty,
       interactionHintContent: model.kind === "fill" ? s.common.helpStringProperty : s.a11y.controlsStringProperty,
     });
-    this.details = details;
+    this.detailsProperty = detailsProperty;
     this.status = status;
   }
   public override dispose(): void {
@@ -88,7 +91,7 @@ export class ConfigurationSummary extends ScreenSummaryContent {
       child.disposeSubtree();
     }
     super.dispose();
-    this.details.dispose();
+    this.detailsProperty.dispose();
     this.status.dispose();
   }
 }
