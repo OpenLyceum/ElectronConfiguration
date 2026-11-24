@@ -26,11 +26,11 @@ const MAX_N: number = SHELL_NODE_SETTINGS.MAX_N;
  */
 export function shellCounts(diagram: Diagram): number[] {
   const counts = subshellCounts(diagram);
-  const shells = Array.from({ length: MAX_N }, () => 0);
+  const shellsProperty = Array.from({ length: MAX_N }, () => 0);
   SUBSHELLS.forEach((s, i) => {
-    shells[s.n - 1] = (shells[s.n - 1] ?? 0) + (counts[i] ?? 0);
+    shellsProperty[s.n - 1] = (shellsProperty[s.n - 1] ?? 0) + (counts[i] ?? 0);
   });
-  return shells;
+  return shellsProperty;
 }
 
 export class ShellNode extends VBox {
@@ -48,9 +48,9 @@ export class ShellNode extends VBox {
       fill: Colors.textColorProperty,
       maxWidth: 2 * (NUCLEUS_RADIUS + maxN * RING_SPACING),
     });
-    const shells = new DerivedProperty([diagramProperty], shellCounts);
-    const paragraph = new DerivedProperty(
-      [shells, caption.stringProperty],
+    const shellsProperty = new DerivedProperty([diagramProperty], shellCounts);
+    const paragraphProperty = new DerivedProperty(
+      [shellsProperty, caption.stringProperty],
       (counts, text) =>
         `${text} ${counts
           .map((c, i) => (c > 0 ? `n=${i + 1}: ${c}` : ""))
@@ -60,9 +60,9 @@ export class ShellNode extends VBox {
     super({
       spacing: SHELL_NODE_SETTINGS.SPACING,
       children: [atom, caption],
-      accessibleParagraph: paragraph,
+      accessibleParagraph: paragraphProperty,
     });
-    const multilink = Multilink.multilink([shells, zProperty], (counts, z) => {
+    const multilink = Multilink.multilink([shellsProperty, zProperty], (counts, z) => {
       for (const child of atom.children.slice()) {
         child.dispose();
       }
@@ -114,8 +114,8 @@ export class ShellNode extends VBox {
     });
     this.disposeShellNode = () => {
       multilink.dispose();
-      paragraph.dispose();
-      shells.dispose();
+      paragraphProperty.dispose();
+      shellsProperty.dispose();
       caption.dispose();
     };
   }

@@ -217,12 +217,12 @@ export class OrbitalBoardNode extends Node {
       const fill = new Rectangle(x, y + BOX_HEIGHT + 3, 0, ORBITAL_BOARD_NODE_SETTINGS.FILL_HEIGHT, {
         fill: blockColor(s.l),
       });
-      const fillWidth = new DerivedProperty(
+      const fillWidthProperty = new DerivedProperty(
         [diagramProperty],
         (diagram) => (width * (subshellCounts(diagram)[subshell] ?? 0)) / capacity,
       );
-      fillWidth.link((w) => fill.setRectWidth(w));
-      owned.push(fillWidth);
+      fillWidthProperty.link((w) => fill.setRectWidth(w));
+      owned.push(fillWidthProperty);
       groups.addChild(track);
       groups.addChild(fill);
       indices.forEach((index, j) => {
@@ -364,7 +364,7 @@ export class OrbitalBoardNode extends Node {
       }
       const index = box.index;
       const orbital = ORBITALS[index];
-      const name = new DerivedProperty(
+      const nameProperty = new DerivedProperty(
         [
           diagramProperty,
           strings.common.orbitalStringProperty,
@@ -380,8 +380,8 @@ export class OrbitalBoardNode extends Node {
             state: [e, u, down, pair][diagram[index] ?? 0],
           }),
       );
-      owned.push(name);
-      box.mutate({ tagName: "button", focusable: true, accessibleName: name });
+      owned.push(nameProperty);
+      box.mutate({ tagName: "button", focusable: true, accessibleName: nameProperty });
       if (options.selectedProperty) {
         const selected = options.selectedProperty;
         const outline = new Rectangle(

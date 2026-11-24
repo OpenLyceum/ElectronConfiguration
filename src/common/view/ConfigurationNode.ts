@@ -3,7 +3,7 @@
  *
  * Each subshell term carries the same s/p/d tint as its row in the orbital diagram and its block in the
  * periodic table, so students can match notation to diagram at a glance. Screen readers get the plain
- * string as a paragraph.
+ * string as a paragraphProperty.
  */
 import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { FlowBox, HBox, Node, Rectangle, Text, type TPaint } from "scenerystack/scenery";
@@ -54,7 +54,7 @@ export class ConfigurationNode extends HBox {
       fill: Colors.textColorProperty,
       maxWidth: CONFIGURATION_NODE_SETTINGS.LABEL_MAX_WIDTH,
     });
-    const paragraph = new DerivedProperty(
+    const paragraphProperty = new DerivedProperty(
       [countsProperty, labelProperty],
       (counts, text) => `${text} ${configuration(counts, abbreviated)}`,
     );
@@ -62,7 +62,7 @@ export class ConfigurationNode extends HBox {
       spacing: CONFIGURATION_NODE_SETTINGS.SPACING,
       align: "top", // A plain Node keeps the HBox from shrinking the FlowBox to its minimum (one chip per line).
       children: [label, new Node({ children: [chips] })],
-      accessibleParagraph: paragraph,
+      accessibleParagraph: paragraphProperty,
     });
     const onCounts = (counts: readonly number[]) => {
       for (const child of chips.children.slice()) {
@@ -79,7 +79,7 @@ export class ConfigurationNode extends HBox {
     countsProperty.link(onCounts);
     this.disposeConfigurationNode = () => {
       countsProperty.unlink(onCounts);
-      paragraph.dispose();
+      paragraphProperty.dispose();
       label.dispose();
     };
   }

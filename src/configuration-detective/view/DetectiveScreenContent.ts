@@ -1,5 +1,5 @@
 /**
- * Configuration Detective — prompt, large answer tiles, and a progress row of stars.
+ * Configuration Detective — promptProperty, large answer tiles, and a progressProperty row of stars.
  */
 import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { StringUtils } from "scenerystack/phetcommon";
@@ -24,7 +24,7 @@ export const createDetectiveScreenContent = (
   const { text, button } = helpers;
   const strings = StringManager.getInstance().getStrings(),
     s = strings.common;
-  const prompt = new DerivedProperty(
+  const promptProperty = new DerivedProperty(
     [
       model.challengeIndexProperty,
       strings.prompts.repairStringProperty,
@@ -115,7 +115,7 @@ export const createDetectiveScreenContent = (
 
   // Progress: a star per challenge, filled once solved; the current one is underlined.
   const stars = new HBox({ spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.STARS_SPACING, align: "bottom" });
-  const progress = new DerivedProperty([model.solvedProperty, s.progressStringProperty], (solved, pattern) =>
+  const progressProperty = new DerivedProperty([model.solvedProperty, s.progressStringProperty], (solved, pattern) =>
     StringUtils.fillIn(pattern, { solved: solved.filter(Boolean).length, total: CHALLENGES.length }),
   );
   const updateStars = () => {
@@ -155,14 +155,14 @@ export const createDetectiveScreenContent = (
   });
   // The paragraph goes on the stars, not the row: a paragraph on a container that also holds a focusable
   // button desynchronizes scenery's PDOM tree when sibling content changes.
-  stars.accessibleParagraph = progress;
+  stars.accessibleParagraph = progressProperty;
 
   return [
     new VBox({
       align: "left",
       spacing: CONFIGURATION_SCREEN_VIEW_SETTINGS.CREATE_DETECTIVE_SPACING,
       excludeInvisibleChildrenFromBounds: true,
-      children: [text(prompt, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.PROMPT_TEXT_SIZE), choices],
+      children: [text(promptProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.PROMPT_TEXT_SIZE), choices],
     }),
     progressRow,
   ];

@@ -181,7 +181,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     });
 
     // ── Target line ─────────────────────────────────────────────────────────
-    const target = new DerivedProperty(
+    const targetProperty = new DerivedProperty(
       [
         model.zProperty,
         model.chargeProperty,
@@ -212,7 +212,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     // The diagram is rebuilt when the table extent changes: more subshells (and an f column) through Rn.
     // Detective challenges all sit within H–Kr, so its diagram keeps the krypton layout.
     // The +Z nucleus label would give away an identify challenge.
-    const nucleusZ = new DerivedProperty([model.zProperty, model.identityHiddenProperty], (z, hidden) =>
+    const nucleusZProperty = new DerivedProperty([model.zProperty, model.identityHiddenProperty], (z, hidden) =>
       hidden ? null : z,
     );
     const boardSlot = new Node();
@@ -229,7 +229,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
             : extent.levels - 1;
       const shells = new ShellNode(
         model.diagramProperty,
-        nucleusZ,
+        nucleusZProperty,
         Math.max(...SUBSHELLS.slice(0, levels).map((sub) => sub.n)),
       );
       shells.visibleProperty = showShellsProperty;
@@ -255,15 +255,18 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     }
 
     // Quantum numbers of the selected orbital, shown only when asked for.
-    const selected = new DerivedProperty([model.selectedProperty, s.selectedStringProperty], (index, pattern) => {
-      const orbital = ORBITALS[index];
-      return StringUtils.fillIn(pattern, {
-        orbital: orbital
-          ? `${SUBSHELLS[orbital.subshell]?.name}, ${orbital.index + 1} · n=${orbital.n}, l=${orbital.l}, mₗ=${orbital.m}; mₛ=±½`
-          : "",
-      });
-    });
-    const selectedNode = text(selected, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.SELECTED_NODE_SIZE);
+    const selectedLabelProperty = new DerivedProperty(
+      [model.selectedProperty, s.selectedStringProperty],
+      (index, pattern) => {
+        const orbital = ORBITALS[index];
+        return StringUtils.fillIn(pattern, {
+          orbital: orbital
+            ? `${SUBSHELLS[orbital.subshell]?.name}, ${orbital.index + 1} · n=${orbital.n}, l=${orbital.l}, mₗ=${orbital.m}; mₛ=±½`
+            : "",
+        });
+      },
+    );
+    const selectedNode = text(selectedLabelProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.SELECTED_NODE_SIZE);
     selectedNode.visibleProperty = model.detailsProperty;
 
     // ── Edit actions ────────────────────────────────────────────────────────
@@ -293,7 +296,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     const leftChildren: Node[] = [
       title,
       ...(parts.createLeftControls?.(model, helpers) ?? []),
-      text(target, TEXT_WIDTH),
+      text(targetProperty, TEXT_WIDTH),
       boardSlot,
       selectedNode,
       actions,
@@ -310,7 +313,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     // ── Right column: status, configuration chips, display options ──────────
     const status = statusText(model);
     const icon = new Node();
-    status.key.link((key) => {
+    status.keyProperty.link((key) => {
       const { glyph, color } = STATUS_ICON[key];
       icon.children = [
         new Circle(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_RADIUS, { fill: color }),
