@@ -4,6 +4,7 @@
  */
 import { EnumerationProperty } from "scenerystack/axon";
 import { TableExtent } from "../common/model/TableExtent.js";
+import ElectronConfigurationNamespace from "../ElectronConfigurationNamespace.js";
 import query from "./electronConfigurationQueryParameters.js";
 
 export class ElectronConfigurationPreferencesModel {
@@ -14,3 +15,5 @@ export class ElectronConfigurationPreferencesModel {
     this.tableExtentProperty.reset();
   }
 }
+
+ElectronConfigurationNamespace.register("ElectronConfigurationPreferencesModel", ElectronConfigurationPreferencesModel);
