@@ -4,9 +4,12 @@
  * Usage: `?maxZ=36` limits the sim to H–Kr (also available in Preferences → Simulation); `?z=26` starts the
  * neutral exploration screens at iron.
  */
+import { logGlobal } from "scenerystack/phet-core";
 import { QueryStringMachine } from "scenerystack/query-string-machine";
 import { ELECTRON_CONFIGURATION_QUERY_PARAMETERS_SETTINGS } from "../ElectronConfigurationConstants.js";
-export default QueryStringMachine.getAll({
+import ElectronConfigurationNamespace from "../ElectronConfigurationNamespace.js";
+
+const electronConfigurationQueryParameters = QueryStringMachine.getAll({
   /** Starting element on Fill the Orbitals and Patterns in the Table (clamped to `maxZ`). */
   z: {
     type: "number",
@@ -22,3 +25,8 @@ export default QueryStringMachine.getAll({
     public: true,
   },
 });
+
+ElectronConfigurationNamespace.register("electronConfigurationQueryParameters", electronConfigurationQueryParameters);
+logGlobal("phet.chipper.queryParameters");
+
+export default electronConfigurationQueryParameters;
