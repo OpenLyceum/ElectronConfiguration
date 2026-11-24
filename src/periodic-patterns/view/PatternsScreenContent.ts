@@ -205,7 +205,7 @@ export const createPatternsScreenContent = (model: ConfigurationModel, helpers: 
       }
     });
     const outer = counts.reduce((sum, c, i) => sum + ((SUBSHELLS[i]?.n ?? 0) === n ? c : 0), 0);
-    return StringUtils.fillIn(pattern, { coreProperty: z - outer, outer });
+    return StringUtils.fillIn(pattern, { core: z - outer, outer });
   });
   return [
     new VBox({

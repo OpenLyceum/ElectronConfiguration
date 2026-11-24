@@ -255,15 +255,18 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     }
 
     // Quantum numbers of the selected orbital, shown only when asked for.
-    const selected = new DerivedProperty([model.selectedProperty, s.selectedStringProperty], (index, pattern) => {
-      const orbital = ORBITALS[index];
-      return StringUtils.fillIn(pattern, {
-        orbital: orbital
-          ? `${SUBSHELLS[orbital.subshell]?.name}, ${orbital.index + 1} · n=${orbital.n}, l=${orbital.l}, mₗ=${orbital.m}; mₛ=±½`
-          : "",
-      });
-    });
-    const selectedNode = text(selected, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.SELECTED_NODE_SIZE);
+    const selectedLabelProperty = new DerivedProperty(
+      [model.selectedProperty, s.selectedStringProperty],
+      (index, pattern) => {
+        const orbital = ORBITALS[index];
+        return StringUtils.fillIn(pattern, {
+          orbital: orbital
+            ? `${SUBSHELLS[orbital.subshell]?.name}, ${orbital.index + 1} · n=${orbital.n}, l=${orbital.l}, mₗ=${orbital.m}; mₛ=±½`
+            : "",
+        });
+      },
+    );
+    const selectedNode = text(selectedLabelProperty, TEXT_WIDTH, CONFIGURATION_SCREEN_VIEW_SETTINGS.SELECTED_NODE_SIZE);
     selectedNode.visibleProperty = model.detailsProperty;
 
     // ── Edit actions ────────────────────────────────────────────────────────
@@ -310,7 +313,7 @@ export class ConfigurationScreenView extends ResponsiveScreenView {
     // ── Right column: status, configuration chips, display options ──────────
     const status = statusText(model);
     const icon = new Node();
-    status.key.link((key) => {
+    status.keyProperty.link((key) => {
       const { glyph, color } = STATUS_ICON[key];
       icon.children = [
         new Circle(CONFIGURATION_SCREEN_VIEW_SETTINGS.CHILDREN_RADIUS, { fill: color }),

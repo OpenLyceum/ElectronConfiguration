@@ -202,7 +202,7 @@ export class OrbitalBoardNode extends Node {
       const width = indices.length * (BOX_WIDTH + BOX_SPACING) - BOX_SPACING;
       groupBounds[subshell] = new Bounds2(x, y, x + width, y + BOX_HEIGHT + 6);
       groups.addChild(
-        new Text(s.nameProperty, {
+        new Text(s.name, {
           font: new PhetFont(ORBITAL_BOARD_NODE_SETTINGS.SUBSHELL_LABEL_FONT_SIZE),
           fill: Colors.textColorProperty,
           right: x - 5,
@@ -375,7 +375,7 @@ export class OrbitalBoardNode extends Node {
         ],
         (diagram, pattern, e, u, down, pair) =>
           StringUtils.fillIn(pattern, {
-            subshell: SUBSHELLS[orbital?.subshell ?? 0]?.nameProperty ?? "",
+            subshell: SUBSHELLS[orbital?.subshell ?? 0]?.name ?? "",
             index: (orbital?.index ?? 0) + 1,
             state: [e, u, down, pair][diagram[index] ?? 0],
           }),
